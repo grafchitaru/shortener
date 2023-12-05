@@ -14,8 +14,9 @@ func TestCreateLink(t *testing.T) {
 		SaveURLError: nil,
 		SaveURLID:    123,
 	}
+	cfg := config.NewConfig()
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		CreateLink(w, r, mockStorage, config.NewConfig())
+		CreateLink(w, r, mockStorage, cfg)
 	})
 
 	req, err := http.NewRequest("POST", "/create", strings.NewReader("http://test.com"))
@@ -31,7 +32,7 @@ func TestCreateLink(t *testing.T) {
 			status, http.StatusCreated)
 	}
 
-	expected := "http://localhost:8080/"
+	expected := cfg.HTTPServerAddress
 	if rr.Body.String()[:len(expected)] != expected {
 		t.Errorf("handler returned unexpected body: got %v want %v",
 			rr.Body.String(), expected)
