@@ -13,9 +13,9 @@ type Storage struct {
 }
 
 func New(storagePath string) (*Storage, error) {
-	const op = "storage.sqlite.NewStorage" // Имя текущей функции для логов и ошибок
+	const op = "storage.sqlite.NewStorage"
 
-	db, err := sql.Open("sqlite3", storagePath) // Подключаемся к БД
+	db, err := sql.Open("sqlite3", storagePath)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
@@ -42,13 +42,11 @@ func New(storagePath string) (*Storage, error) {
 func (s *Storage) SaveURL(urlToSave string, alias string) (int64, error) {
 	const op = "storage.sqlite.SaveURL"
 
-	// Подготавливаем запрос
 	stmt, err := s.db.Prepare("INSERT INTO url(url,alias) values(?,?)")
 	if err != nil {
 		return 0, fmt.Errorf("%s: prepare statement: %w", op, err)
 	}
 
-	// Выполняем запрос
 	res, err := stmt.Exec(urlToSave, alias)
 	if err != nil {
 		if sqliteErr, ok := err.(sqlite3.Error); ok && sqliteErr.ExtendedCode == sqlite3.ErrConstraintUnique {
@@ -58,13 +56,11 @@ func (s *Storage) SaveURL(urlToSave string, alias string) (int64, error) {
 		return 0, fmt.Errorf("%s: execute statement: %w", op, err)
 	}
 
-	// Получаем ID созданной записи
 	id, err := res.LastInsertId()
 	if err != nil {
 		return 0, fmt.Errorf("%s: failed to get last insert id: %w", op, err)
 	}
 
-	// Возвращаем ID
 	return id, nil
 }
 
