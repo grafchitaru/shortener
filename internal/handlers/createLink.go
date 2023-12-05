@@ -19,5 +19,5 @@ func CreateLink(res http.ResponseWriter, req *http.Request, storage storage.Repo
 
 	storage.SaveURL(string(reqBody), alias)
 	res.WriteHeader(http.StatusCreated)
-	res.Write([]byte(cfg.BaseShortURL + alias))
+	res.Write([]byte(cfg.BaseShortURL + "/" + alias))
 }
