@@ -15,9 +15,10 @@ func NewConfig() *Config {
 
 	err := env.Parse(&cfg)
 	if err != nil {
-		flag.StringVar(&cfg.HTTPServerAddress, "a", "127.0.0.1:8080", "HTTP server address")
-		flag.StringVar(&cfg.BaseShortURL, "b", "http://127.0.0.1:8080", "Base address for the resulting shortened URL")
+		panic("can't parse config")
 	}
+	flag.StringVar(&cfg.HTTPServerAddress, "a", "127.0.0.1:8080", "HTTP server address")
+	flag.StringVar(&cfg.BaseShortURL, "b", "http://127.0.0.1:8080", "Base address for the resulting shortened URL")
 
 	flag.Parse()
 
