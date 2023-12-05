@@ -25,7 +25,7 @@ func Server() {
 		handlers.CreateLink(res, req, storage, cfg)
 	})
 
-	err = http.ListenAndServe(cfg.HttpServerAddress, r)
+	err = http.ListenAndServe(cfg.HTTPServerAddress, r)
 	if err != nil {
 		panic(err)
 	}
