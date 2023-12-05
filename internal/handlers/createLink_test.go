@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/grafchitaru/shortener/internal/config"
 	"github.com/grafchitaru/shortener/internal/storage/mocks"
 	"net/http"
 	"net/http/httptest"
@@ -14,7 +15,7 @@ func TestCreateLink(t *testing.T) {
 		SaveURLID:    123,
 	}
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		CreateLink(w, r, mockStorage)
+		CreateLink(w, r, mockStorage, config.NewConfig())
 	})
 
 	req, err := http.NewRequest("POST", "/create", strings.NewReader("http://test.com"))
