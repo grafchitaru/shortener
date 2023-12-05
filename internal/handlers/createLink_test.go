@@ -32,7 +32,7 @@ func TestCreateLink(t *testing.T) {
 			status, http.StatusCreated)
 	}
 
-	expected := cfg.HTTPServerAddress
+	expected := cfg.BaseShortURL
 	if rr.Body.String()[:len(expected)] != expected {
 		t.Errorf("handler returned unexpected body: got %v want %v",
 			rr.Body.String(), expected)
