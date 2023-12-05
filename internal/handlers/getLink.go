@@ -1,17 +1,12 @@
 package handlers
 
 import (
-	"github.com/grafchitaru/shortener/internal/storage/sqlite"
+	"github.com/grafchitaru/shortener/internal/storage"
 	"net/http"
 	"strings"
 )
 
-func GetLink(res http.ResponseWriter, req *http.Request) {
-	storage, err := sqlite.New("././internal/storage/storage.db")
-	if err != nil {
-		panic(err)
-	}
-
+func GetLink(res http.ResponseWriter, req *http.Request, storage storage.Repositories) {
 	path := strings.TrimPrefix(req.URL.Path, "/")
 	alias, err := storage.GetURL(path)
 	if err != nil {
