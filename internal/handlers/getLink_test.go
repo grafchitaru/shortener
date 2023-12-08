@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/grafchitaru/shortener/internal/config"
 	"github.com/grafchitaru/shortener/internal/storage/mocks"
 	"net/http"
 	"net/http/httptest"
@@ -13,7 +14,7 @@ func TestGetLink(t *testing.T) {
 		GetURLResult: "http://test.com",
 	}
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		GetLink(w, r, mockStorage)
+		GetLink(config.HandlerContext{Repos: mockStorage}, w, r)
 	})
 
 	req, err := http.NewRequest("GET", "/testalias", nil)

@@ -15,8 +15,9 @@ func TestCreateLink(t *testing.T) {
 		SaveURLID:    123,
 	}
 	cfg := config.NewConfig()
+
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		CreateLink(w, r, mockStorage, cfg)
+		CreateLink(config.HandlerContext{Config: *cfg, Repos: mockStorage}, w, r)
 	})
 
 	req, err := http.NewRequest("POST", "/create", strings.NewReader("http://test.com"))

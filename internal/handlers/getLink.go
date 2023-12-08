@@ -2,16 +2,16 @@ package handlers
 
 import (
 	"github.com/go-chi/chi/v5"
-	"github.com/grafchitaru/shortener/internal/storage"
+	"github.com/grafchitaru/shortener/internal/config"
 	"net/http"
 )
 
-func GetLink(res http.ResponseWriter, req *http.Request, storage storage.Repositories) {
+func GetLink(ctx config.HandlerContext, res http.ResponseWriter, req *http.Request) {
 	path := chi.URLParam(req, "id")
-	alias, err := storage.GetURL(path)
+	alias, err := ctx.Repos.GetURL(path)
 	if err != nil {
-		res.WriteHeader(http.StatusBadRequest)
-		res.Write([]byte("Bad Request"))
+		http.Error(res, err.Error(), http.StatusBadRequest)
+		return
 	}
 
 	res.Header().Set("Location", alias)

@@ -1,7 +1,11 @@
 package main
 
-import "github.com/grafchitaru/shortener/internal/server"
+import (
+	"github.com/grafchitaru/shortener/internal/config"
+	"github.com/grafchitaru/shortener/internal/server"
+)
 
 func main() {
-	server.Server()
+	cfg := *config.NewConfig()
+	server.New(cfg)
 }
