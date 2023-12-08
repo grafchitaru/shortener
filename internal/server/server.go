@@ -15,7 +15,7 @@ func New(cfg config.Config) {
 	var storage storage2.Repositories
 	var err error
 
-	if cfg.UseSqlite == true {
+	if cfg.UseSqlite {
 		storage, err = sqlite.New(cfg.SqliteStoragePath)
 	} else {
 		storage = inmemory.New()
