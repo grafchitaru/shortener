@@ -22,8 +22,8 @@ func TestGetShorten(t *testing.T) {
 	link := Link{
 		Url: "http://test.com",
 	}
-	linkJson, _ := json.Marshal(link)
-	req, err := http.NewRequest("POST", "/shorten", bytes.NewBuffer(linkJson))
+	linkJSON, _ := json.Marshal(link)
+	req, err := http.NewRequest("POST", "/shorten", bytes.NewBuffer(linkJSON))
 	if err != nil {
 		t.Fatal(err)
 	}
