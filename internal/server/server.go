@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"github.com/go-chi/chi/v5"
+	"github.com/grafchitaru/shortener/internal/compress"
 	"github.com/grafchitaru/shortener/internal/config"
 	"github.com/grafchitaru/shortener/internal/handlers"
 	"github.com/grafchitaru/shortener/internal/logger"
@@ -38,7 +39,7 @@ func New(cfg config.Config) {
 		handlers.GetShorten(config.HandlerContext{Config: cfg, Repos: storage}, res, req)
 	}))
 
-	err = http.ListenAndServe(cfg.HTTPServerAddress, r)
+	err = http.ListenAndServe(cfg.HTTPServerAddress, compress.GzipHandle(r))
 	if err != nil {
 		fmt.Println("Error server: %w", err)
 	}
