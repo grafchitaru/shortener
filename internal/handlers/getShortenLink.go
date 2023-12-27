@@ -45,6 +45,6 @@ func GetShorten(ctx config.HandlerContext, res http.ResponseWriter, req *http.Re
 	}
 
 	res.Header().Set("Content-Type", "application/json")
-	res.WriteHeader(http.StatusOK)
+	res.WriteHeader(http.StatusCreated)
 	res.Write([]byte(resp))
 }
