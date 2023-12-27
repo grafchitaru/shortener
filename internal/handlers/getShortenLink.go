@@ -8,7 +8,7 @@ import (
 )
 
 type Link struct {
-	Url string `json:"url"`
+	URL string `json:"url"`
 }
 
 type Result struct {
@@ -28,7 +28,7 @@ func GetShorten(ctx config.HandlerContext, res http.ResponseWriter, req *http.Re
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
 	}
-	url := link.Url
+	url := link.URL
 
 	alias, err := ctx.Repos.GetAlias(url)
 	if err != nil {
