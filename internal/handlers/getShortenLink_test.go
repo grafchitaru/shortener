@@ -7,21 +7,17 @@ import (
 	"github.com/grafchitaru/shortener/internal/storage/mocks"
 	"net/http"
 	"net/http/httptest"
+	"regexp"
 	"testing"
 )
 
 func TestGetShorten(t *testing.T) {
-	mockStorage := &mocks.MockStorage{
-		GetAliasError:  nil,
-		GetAliasResult: "testalias",
-	}
+	mockStorage := &mocks.MockStorage{}
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		GetShorten(config.HandlerContext{Repos: mockStorage}, w, r)
 	})
 
-	link := Link{
-		URL: "http://test.com",
-	}
+	link := Link{URL: "http://test.com"}
 	linkJSON, _ := json.Marshal(link)
 	req, err := http.NewRequest("POST", "/shorten", bytes.NewBuffer(linkJSON))
 	if err != nil {
@@ -36,9 +32,14 @@ func TestGetShorten(t *testing.T) {
 			status, http.StatusOK)
 	}
 
-	expected := "{\"result\":\"/testalias\"}"
-	if body := rr.Body.String(); body != expected {
-		t.Errorf("handler returned unexpected body: got %v want %v",
-			body, expected)
+	contentType := rr.Header().Get("Content-Type")
+	if contentType != "application/json" {
+		t.Errorf("handler returned unexpected content type: got %v want %v",
+			contentType, "application/json")
+	}
+
+	expectedPattern := regexp.MustCompile(`\{\"result\"\:\"\/\w+\"\}`)
+	if !expectedPattern.MatchString(rr.Body.String()) {
+		t.Errorf("handler returned unexpected result: got %v", rr.Body.String())
 	}
 }
