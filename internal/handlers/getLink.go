@@ -11,7 +11,6 @@ func GetLink(ctx config.HandlerContext, res http.ResponseWriter, req *http.Reque
 	alias, err := ctx.Repos.GetURL(path)
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusNotFound)
-		res.Header().Set("Location", "")
 		return
 	}
 
