@@ -64,3 +64,17 @@ func GzipHandleDecompress(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	})
 }
+
+func GzipDecompress(req *http.Request) (*http.Request, error) {
+	if strings.Contains(req.Header.Get("Content-Encoding"), "gzip") {
+		gr, err := gzip.NewReader(req.Body)
+		if err != nil {
+			return req, err
+		}
+		defer gr.Close()
+
+		req.Body = &GzipReader{ReadCloser: gr}
+	}
+
+	return req, nil
+}

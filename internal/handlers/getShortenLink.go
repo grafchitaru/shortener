@@ -2,13 +2,11 @@ package handlers
 
 import (
 	"bytes"
-	"compress/gzip"
 	"encoding/json"
 	"github.com/grafchitaru/shortener/internal/app"
 	"github.com/grafchitaru/shortener/internal/compress"
 	"github.com/grafchitaru/shortener/internal/config"
 	"net/http"
-	"strings"
 )
 
 type Link struct {
@@ -20,19 +18,15 @@ type Result struct {
 }
 
 func GetShorten(ctx config.HandlerContext, res http.ResponseWriter, req *http.Request) {
-	if strings.Contains(req.Header.Get("Content-Encoding"), "gzip") {
-		gr, err := gzip.NewReader(req.Body)
-		if err != nil {
-			http.Error(res, err.Error(), http.StatusBadRequest)
-			return
-		}
-		defer gr.Close()
-
-		req.Body = &compress.GzipReader{ReadCloser: gr}
+	decompressReq, err := compress.GzipDecompress(req)
+	if err != nil {
+		http.Error(res, err.Error(), http.StatusBadRequest)
+		return
 	}
+
 	var link Link
 	var buf bytes.Buffer
-	_, err := buf.ReadFrom(req.Body)
+	_, err = buf.ReadFrom(decompressReq.Body)
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
