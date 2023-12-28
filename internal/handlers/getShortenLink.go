@@ -3,7 +3,6 @@ package handlers
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/grafchitaru/shortener/internal/app"
 	"github.com/grafchitaru/shortener/internal/config"
 	"net/http"
 )
@@ -31,9 +30,11 @@ func GetShorten(ctx config.HandlerContext, res http.ResponseWriter, req *http.Re
 	}
 	url := link.URL
 
-	alias := app.NewRandomString(6)
-
-	ctx.Repos.SaveURL(url, alias)
+	alias, err := ctx.Repos.GetAlias(url)
+	if err != nil {
+		http.Error(res, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	result := Result{
 		Result: ctx.Config.BaseShortURL + "/" + alias,
@@ -45,6 +46,6 @@ func GetShorten(ctx config.HandlerContext, res http.ResponseWriter, req *http.Re
 	}
 
 	res.Header().Set("Content-Type", "application/json")
-	res.WriteHeader(http.StatusCreated)
+	res.WriteHeader(http.StatusOK)
 	res.Write([]byte(resp))
 }
