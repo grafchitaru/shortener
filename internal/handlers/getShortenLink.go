@@ -34,7 +34,7 @@ func GetShorten(ctx config.HandlerContext, res http.ResponseWriter, req *http.Re
 	status := http.StatusOK
 	alias, err := ctx.Repos.GetAlias(url)
 	if err != nil {
-		alias := app.NewRandomString(6)
+		alias = app.NewRandomString(6)
 		ctx.Repos.SaveURL(url, alias)
 		status = http.StatusCreated
 	}
