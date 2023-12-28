@@ -8,17 +8,14 @@ import (
 
 func GetLink(ctx config.HandlerContext, res http.ResponseWriter, req *http.Request) {
 	path := chi.URLParam(req, "id")
-	if path == "" {
-		http.Error(res, "Error read id param", http.StatusInternalServerError)
-		return
-	}
-
 	alias, err := ctx.Repos.GetURL(path)
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusNotFound)
+		res.Header().Set("Location", "")
 		return
 	}
 
-	res.WriteHeader(http.StatusTemporaryRedirect)
 	res.Header().Set("Location", alias)
+	res.WriteHeader(http.StatusTemporaryRedirect)
+
 }
