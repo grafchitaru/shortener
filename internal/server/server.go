@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"github.com/go-chi/chi/v5"
+	"github.com/grafchitaru/shortener/internal/compress"
 	"github.com/grafchitaru/shortener/internal/config"
 	"github.com/grafchitaru/shortener/internal/handlers"
 	"github.com/grafchitaru/shortener/internal/logger"
@@ -26,17 +27,21 @@ func New(cfg config.Config) {
 	}
 
 	r := chi.NewRouter()
-	r.Get("/{id}", logger.WithLogging(func(res http.ResponseWriter, req *http.Request) {
+
+	r.Use(logger.WithLogging)
+	r.Use(compress.WithCompressionResponse)
+
+	r.Get("/{id}", func(res http.ResponseWriter, req *http.Request) {
 		handlers.GetLink(config.HandlerContext{Config: cfg, Repos: storage}, res, req)
-	}))
+	})
 
-	r.Post("/", logger.WithLogging(func(res http.ResponseWriter, req *http.Request) {
+	r.Post("/", func(res http.ResponseWriter, req *http.Request) {
 		handlers.CreateLink(config.HandlerContext{Config: cfg, Repos: storage}, res, req)
-	}))
+	})
 
-	r.Post("/api/shorten", logger.WithLogging(func(res http.ResponseWriter, req *http.Request) {
+	r.Post("/api/shorten", func(res http.ResponseWriter, req *http.Request) {
 		handlers.GetShorten(config.HandlerContext{Config: cfg, Repos: storage}, res, req)
-	}))
+	})
 
 	err = http.ListenAndServe(cfg.HTTPServerAddress, r)
 	if err != nil {

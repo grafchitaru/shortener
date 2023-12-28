@@ -1,10 +1,11 @@
 package handlers
 
 import (
-	"bytes"
+	"compress/gzip"
 	"encoding/json"
 	"github.com/grafchitaru/shortener/internal/app"
 	"github.com/grafchitaru/shortener/internal/config"
+	"io"
 	"net/http"
 )
 
@@ -17,23 +18,41 @@ type Result struct {
 }
 
 func GetShorten(ctx config.HandlerContext, res http.ResponseWriter, req *http.Request) {
-	var link Link
-	var buf bytes.Buffer
-	_, err := buf.ReadFrom(req.Body)
-	if err != nil {
-		http.Error(res, err.Error(), http.StatusBadRequest)
+	var reader io.Reader
+
+	if req.Header.Get(`Content-Encoding`) == `gzip` {
+		gz, err := gzip.NewReader(req.Body)
+		if err != nil {
+			http.Error(res, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		reader = gz
+		defer gz.Close()
+	} else {
+		reader = req.Body
+	}
+
+	body, ioError := io.ReadAll(reader)
+	if ioError != nil {
+		http.Error(res, ioError.Error(), http.StatusBadRequest)
 		return
 	}
 
-	if err = json.Unmarshal(buf.Bytes(), &link); err != nil {
+	var link Link
+
+	if err := json.Unmarshal(body, &link); err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
 	}
 	url := link.URL
 
-	alias := app.NewRandomString(6)
-
-	ctx.Repos.SaveURL(url, alias)
+	status := http.StatusOK
+	alias, err := ctx.Repos.GetAlias(url)
+	if err != nil {
+		alias = app.NewRandomString(6)
+		ctx.Repos.SaveURL(url, alias)
+		status = http.StatusCreated
+	}
 
 	result := Result{
 		Result: ctx.Config.BaseShortURL + "/" + alias,
@@ -45,6 +64,6 @@ func GetShorten(ctx config.HandlerContext, res http.ResponseWriter, req *http.Re
 	}
 
 	res.Header().Set("Content-Type", "application/json")
-	res.WriteHeader(http.StatusCreated)
+	res.WriteHeader(status)
 	res.Write([]byte(resp))
 }
