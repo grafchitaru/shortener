@@ -29,8 +29,7 @@ func New(cfg config.Config) {
 	r := chi.NewRouter()
 
 	r.Use(logger.WithLogging)
-	r.Use(compress.GzipHandleCompress)
-	r.Use(compress.GzipHandleDecompress)
+	r.Use(compress.WithCompressionResponse)
 
 	r.Get("/{id}", func(res http.ResponseWriter, req *http.Request) {
 		handlers.GetLink(config.HandlerContext{Config: cfg, Repos: storage}, res, req)

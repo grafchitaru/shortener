@@ -1,11 +1,11 @@
 package handlers
 
 import (
-	"bytes"
+	"compress/gzip"
 	"encoding/json"
 	"github.com/grafchitaru/shortener/internal/app"
-	"github.com/grafchitaru/shortener/internal/compress"
 	"github.com/grafchitaru/shortener/internal/config"
+	"io"
 	"net/http"
 )
 
@@ -18,21 +18,29 @@ type Result struct {
 }
 
 func GetShorten(ctx config.HandlerContext, res http.ResponseWriter, req *http.Request) {
-	decompressReq, err := compress.GzipDecompress(req)
-	if err != nil {
-		http.Error(res, err.Error(), http.StatusBadRequest)
+	var reader io.Reader
+
+	if req.Header.Get(`Content-Encoding`) == `gzip` {
+		gz, err := gzip.NewReader(req.Body)
+		if err != nil {
+			http.Error(res, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		reader = gz
+		defer gz.Close()
+	} else {
+		reader = req.Body
+	}
+
+	body, ioError := io.ReadAll(reader)
+	if ioError != nil {
+		http.Error(res, ioError.Error(), http.StatusBadRequest)
 		return
 	}
 
 	var link Link
-	var buf bytes.Buffer
-	_, err = buf.ReadFrom(decompressReq.Body)
-	if err != nil {
-		http.Error(res, err.Error(), http.StatusBadRequest)
-		return
-	}
 
-	if err = json.Unmarshal(buf.Bytes(), &link); err != nil {
+	if err := json.Unmarshal(body, &link); err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
 	}
