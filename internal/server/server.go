@@ -31,15 +31,15 @@ func New(cfg config.Config) {
 		handlers.GetLink(config.HandlerContext{Config: cfg, Repos: storage}, res, req)
 	}))
 
-	r.Post("/", logger.WithLogging(func(res http.ResponseWriter, req *http.Request) {
+	r.Post("/", logger.WithLogging(compress.GzipHandle(func(res http.ResponseWriter, req *http.Request) {
 		handlers.CreateLink(config.HandlerContext{Config: cfg, Repos: storage}, res, req)
-	}))
+	})))
 
-	r.Post("/api/shorten", logger.WithLogging(func(res http.ResponseWriter, req *http.Request) {
+	r.Post("/api/shorten", logger.WithLogging(compress.GzipHandle(func(res http.ResponseWriter, req *http.Request) {
 		handlers.GetShorten(config.HandlerContext{Config: cfg, Repos: storage}, res, req)
-	}))
+	})))
 
-	err = http.ListenAndServe(cfg.HTTPServerAddress, compress.GzipHandle(r))
+	err = http.ListenAndServe(cfg.HTTPServerAddress, r)
 	if err != nil {
 		fmt.Println("Error server: %w", err)
 	}
