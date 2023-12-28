@@ -27,17 +27,22 @@ func New(cfg config.Config) {
 	}
 
 	r := chi.NewRouter()
-	r.Get("/{id}", logger.WithLogging(compress.GzipHandle(func(res http.ResponseWriter, req *http.Request) {
+
+	r.Use(logger.WithLogging)
+	r.Use(compress.GzipHandleCompress)
+	r.Use(compress.GzipHandleDecompress)
+
+	r.Get("/{id}", func(res http.ResponseWriter, req *http.Request) {
 		handlers.GetLink(config.HandlerContext{Config: cfg, Repos: storage}, res, req)
-	})))
+	})
 
-	r.Post("/", logger.WithLogging(compress.GzipHandle(func(res http.ResponseWriter, req *http.Request) {
+	r.Post("/", func(res http.ResponseWriter, req *http.Request) {
 		handlers.CreateLink(config.HandlerContext{Config: cfg, Repos: storage}, res, req)
-	})))
+	})
 
-	r.Post("/api/shorten", logger.WithLogging(compress.GzipHandle(func(res http.ResponseWriter, req *http.Request) {
+	r.Post("/api/shorten", func(res http.ResponseWriter, req *http.Request) {
 		handlers.GetShorten(config.HandlerContext{Config: cfg, Repos: storage}, res, req)
-	})))
+	})
 
 	err = http.ListenAndServe(cfg.HTTPServerAddress, r)
 	if err != nil {
