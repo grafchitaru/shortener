@@ -20,16 +20,16 @@ func New(filePath string) (*Storage, error) {
 }
 
 func (s *Storage) SaveURL(urlToSave string, alias string) (int64, error) {
-	type UrlData struct {
-		Uuid        string `json:"uuid"`
-		ShortUrl    string `json:"short_url"`
-		OriginalUrl string `json:"original_url"`
+	type URLData struct {
+		UUID        string `json:"uuid"`
+		ShortURL    string `json:"short_url"`
+		OriginalURL string `json:"original_url"`
 	}
 
-	data := UrlData{
-		Uuid:        alias,
-		ShortUrl:    alias,
-		OriginalUrl: urlToSave,
+	data := URLData{
+		UUID:        alias,
+		ShortURL:    alias,
+		OriginalURL: urlToSave,
 	}
 
 	jsonData, err := json.Marshal(data)
@@ -51,10 +51,10 @@ func (s *Storage) SaveURL(urlToSave string, alias string) (int64, error) {
 }
 
 func (s *Storage) GetURL(alias string) (string, error) {
-	type UrlData struct {
-		Uuid        string `json:"uuid"`
-		ShortUrl    string `json:"short_url"`
-		OriginalUrl string `json:"original_url"`
+	type URLData struct {
+		UUID        string `json:"uuid"`
+		ShortURL    string `json:"short_url"`
+		OriginalURL string `json:"original_url"`
 	}
 
 	f, err := os.Open(s.filePath)
@@ -65,14 +65,14 @@ func (s *Storage) GetURL(alias string) (string, error) {
 
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
-		var url UrlData
+		var url URLData
 		err := json.Unmarshal(scanner.Bytes(), &url)
 		if err != nil {
 			continue // Skip invalid lines
 		}
 
-		if url.Uuid == alias {
-			return url.OriginalUrl, nil
+		if url.UUID == alias {
+			return url.OriginalURL, nil
 		}
 	}
 
@@ -84,10 +84,10 @@ func (s *Storage) GetURL(alias string) (string, error) {
 }
 
 func (s *Storage) GetAlias(url string) (string, error) {
-	type UrlData struct {
-		Uuid        string `json:"uuid"`
-		ShortUrl    string `json:"short_url"`
-		OriginalUrl string `json:"original_url"`
+	type URLData struct {
+		UUID        string `json:"uuid"`
+		ShortURL    string `json:"short_url"`
+		OriginalURL string `json:"original_url"`
 	}
 
 	f, err := os.Open(s.filePath)
@@ -98,14 +98,14 @@ func (s *Storage) GetAlias(url string) (string, error) {
 
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
-		var urlData UrlData
-		err := json.Unmarshal(scanner.Bytes(), &urlData)
+		var URLData URLData
+		err := json.Unmarshal(scanner.Bytes(), &URLData)
 		if err != nil {
 			continue // Skip invalid lines
 		}
 
-		if urlData.OriginalUrl == url {
-			return urlData.Uuid, nil
+		if URLData.OriginalURL == url {
+			return URLData.UUID, nil
 		}
 	}
 
