@@ -57,6 +57,10 @@ func (s *Storage) SaveURL(urlToSave string, alias string) (int64, error) {
 		return 0, err
 	}
 
+	if err := f.Sync(); err != nil {
+		return 0, err
+	}
+
 	return int64(len(jsonData)), nil
 }
 
