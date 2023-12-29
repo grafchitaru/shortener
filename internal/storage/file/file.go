@@ -47,7 +47,7 @@ func (s *Storage) SaveURL(urlToSave string, alias string) (int64, error) {
 		return 0, err
 	}
 
-	f, err := os.OpenFile(s.filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	f, err := os.OpenFile(s.filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
 		return 0, err
 	}
