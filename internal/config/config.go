@@ -13,7 +13,7 @@ type Config struct {
 	UseSqlite         bool   `env:"USE_SQLITE" envDefault:"false"`
 	SqliteStoragePath string `env:"SQLITE_STORAGE_PATH" envDefault:"././internal/storage/storage.db"`
 	UseDatabaseFile   bool   `env:"USE_DATABASE_FILE" envDefault:"true"`
-	FileDatabasePath  string `env:"FILE_STORAGE_PATH" envDefault:"././internal/storage/database.txt"`
+	FileDatabasePath  string `env:"FILE_STORAGE_PATH" envDefault:"/tmp/short-url-db.json"`
 }
 
 type HandlerContext struct {
@@ -30,7 +30,7 @@ func NewConfig() *Config {
 	}
 	flag.StringVar(&cfg.HTTPServerAddress, "a", "127.0.0.1:8080", "HTTP server address")
 	flag.StringVar(&cfg.BaseShortURL, "b", "http://127.0.0.1:8080", "Base address for the resulting shortened URL")
-	flag.StringVar(&cfg.FileDatabasePath, "f", "././internal/storage/database.txt", "File storage path")
+	flag.StringVar(&cfg.FileDatabasePath, "f", "/tmp/short-url-db.json", "File storage path")
 
 	flag.Parse()
 
