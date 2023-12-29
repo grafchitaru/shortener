@@ -19,7 +19,7 @@ func New(cfg config.Config) {
 	var err error
 
 	if cfg.UseDatabaseFile {
-		storage, err = file.New("./cmd/shortener" + cfg.FileDatabasePath)
+		storage, err = file.New(cfg.FileDatabasePath)
 	} else if cfg.UseSqlite {
 		storage, err = sqlite.New(cfg.SqliteStoragePath)
 	} else {
