@@ -13,9 +13,19 @@ type Storage struct {
 }
 
 func New(filePath string) (*Storage, error) {
-	if err := os.MkdirAll(filepath.Dir(filePath), os.ModePerm); err != nil {
-		return nil, err
+	dir := filepath.Dir(filePath)
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		if err := os.MkdirAll(dir, os.ModePerm); err != nil {
+			return nil, err
+		}
 	}
+
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		if _, err := os.Create(filePath); err != nil {
+			return nil, err
+		}
+	}
+
 	return &Storage{filePath: filePath}, nil
 }
 
