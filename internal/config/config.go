@@ -28,9 +28,9 @@ func NewConfig() *Config {
 	if err != nil {
 		fmt.Println("Can't parse  config: %w", err)
 	}
-	flag.StringVar(&cfg.HTTPServerAddress, "a", "127.0.0.1:8080", "HTTP server address")
-	flag.StringVar(&cfg.BaseShortURL, "b", "http://127.0.0.1:8080", "Base address for the resulting shortened URL")
-	flag.StringVar(&cfg.FileDatabasePath, "f", "/tmp/short-url-db.json", "File storage path")
+	flag.StringVar(&cfg.HTTPServerAddress, "a", cfg.HTTPServerAddress, "HTTP server address")
+	flag.StringVar(&cfg.BaseShortURL, "b", cfg.BaseShortURL, "Base address for the resulting shortened URL")
+	flag.StringVar(&cfg.FileDatabasePath, "f", cfg.FileDatabasePath, "File storage path")
 
 	flag.Parse()
 
