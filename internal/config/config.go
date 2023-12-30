@@ -12,6 +12,8 @@ type Config struct {
 	BaseShortURL      string `env:"BASE_URL" envDefault:"http://127.0.0.1:8080"`
 	UseSqlite         bool   `env:"USE_SQLITE" envDefault:"false"`
 	SqliteStoragePath string `env:"SQLITE_STORAGE_PATH" envDefault:"././internal/storage/storage.db"`
+	UseDatabaseFile   bool   `env:"USE_DATABASE_FILE" envDefault:"true"`
+	FileDatabasePath  string `env:"FILE_STORAGE_PATH" envDefault:"/tmp/short-url-db.json"`
 }
 
 type HandlerContext struct {
@@ -26,8 +28,9 @@ func NewConfig() *Config {
 	if err != nil {
 		fmt.Println("Can't parse  config: %w", err)
 	}
-	flag.StringVar(&cfg.HTTPServerAddress, "a", "127.0.0.1:8080", "HTTP server address")
-	flag.StringVar(&cfg.BaseShortURL, "b", "http://127.0.0.1:8080", "Base address for the resulting shortened URL")
+	flag.StringVar(&cfg.HTTPServerAddress, "a", cfg.HTTPServerAddress, "HTTP server address")
+	flag.StringVar(&cfg.BaseShortURL, "b", cfg.BaseShortURL, "Base address for the resulting shortened URL")
+	flag.StringVar(&cfg.FileDatabasePath, "f", cfg.FileDatabasePath, "File storage path")
 
 	flag.Parse()
 
