@@ -34,3 +34,16 @@ func (r *Repositories) GetURL(alias string) (string, error) {
 	}
 	return url, nil
 }
+
+func (r *Repositories) GetAlias(url string) (string, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	for k, v := range r.storage {
+		if v == url {
+			return k, nil
+		}
+	}
+
+	return "", storage.ErrAliasNotFound
+}

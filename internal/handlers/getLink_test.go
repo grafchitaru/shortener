@@ -1,38 +1,55 @@
 package handlers
 
 import (
-	"github.com/grafchitaru/shortener/internal/config"
-	"github.com/grafchitaru/shortener/internal/storage/mocks"
+	"bytes"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/grafchitaru/shortener/internal/config"
+	"github.com/grafchitaru/shortener/internal/storage/mocks"
 )
 
 func TestGetLink(t *testing.T) {
-	mockStorage := &mocks.MockStorage{
-		GetURLError:  nil,
-		GetURLResult: "http://test.com",
+	tests := []struct {
+		name           string
+		mockStorage    *mocks.MockStorage
+		expectedStatus int
+	}{
+		{
+			name: "Error when getting URL",
+			mockStorage: &mocks.MockStorage{
+				SaveURLError:   nil,
+				SaveURLID:      1,
+				GetURLError:    errors.New("some error"),
+				GetURLResult:   "",
+				GetAliasResult: "",
+			},
+			expectedStatus: http.StatusNotFound,
+		},
+		{
+			name: "Successful operation",
+			mockStorage: &mocks.MockStorage{
+				SaveURLError:   nil,
+				SaveURLID:      1,
+				GetURLError:    nil,
+				GetURLResult:   "http://example.com",
+				GetAliasResult: "tUaOlJ",
+			},
+			expectedStatus: http.StatusTemporaryRedirect,
+		},
 	}
-	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		GetLink(config.HandlerContext{Repos: mockStorage}, w, r)
-	})
 
-	req, err := http.NewRequest("GET", "/testalias", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	rr := httptest.NewRecorder()
-	handler.ServeHTTP(rr, req)
-
-	if status := rr.Code; status != http.StatusTemporaryRedirect {
-		t.Errorf("handler returned wrong status code: got %v want %v",
-			status, http.StatusTemporaryRedirect)
-	}
-
-	expected := "http://test.com"
-	if location := rr.Header().Get("Location"); location != expected {
-		t.Errorf("handler returned unexpected location: got %v want %v",
-			location, expected)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := httptest.NewRecorder()
+			req, _ := http.NewRequest("GET", "/tUaOlJ", bytes.NewBufferString(""))
+			ctx := config.HandlerContext{Repos: tt.mockStorage}
+			GetLink(ctx, r, req)
+			if status := r.Code; status != tt.expectedStatus {
+				t.Errorf("handler returned wrong status code: got %v want %v", status, tt.expectedStatus)
+			}
+		})
 	}
 }

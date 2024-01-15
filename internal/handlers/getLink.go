@@ -10,10 +10,11 @@ func GetLink(ctx config.HandlerContext, res http.ResponseWriter, req *http.Reque
 	path := chi.URLParam(req, "id")
 	alias, err := ctx.Repos.GetURL(path)
 	if err != nil {
-		http.Error(res, err.Error(), http.StatusBadRequest)
+		http.Error(res, err.Error(), http.StatusNotFound)
 		return
 	}
 
 	res.Header().Set("Location", alias)
 	res.WriteHeader(http.StatusTemporaryRedirect)
+
 }
