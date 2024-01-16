@@ -36,7 +36,7 @@ func CreateLink(ctx config.HandlerContext, res http.ResponseWriter, req *http.Re
 	json.Unmarshal(body, &originalURL)
 
 	alias, err := ctx.Repos.GetAlias(originalURL)
-	if err != nil && !errors.Is(err, storage.ErrURLNotFound) {
+	if err != nil && !errors.Is(err, storage.ErrAliasNotFound) {
 		http.Error(res, err.Error(), http.StatusInternalServerError)
 		return
 	}

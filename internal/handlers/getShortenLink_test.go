@@ -23,7 +23,7 @@ func TestGetShorten(t *testing.T) {
 		URL: "http://test.com",
 	}
 	linkJSON, _ := json.Marshal(link)
-	req, err := http.NewRequest("POST", "/shorten", bytes.NewBuffer(linkJSON))
+	req, err := http.NewRequest("POST", "/api/shorten", bytes.NewBuffer(linkJSON))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -31,9 +31,9 @@ func TestGetShorten(t *testing.T) {
 	rr := httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
 
-	if status := rr.Code; status != http.StatusOK {
+	if status := rr.Code; status != http.StatusConflict {
 		t.Errorf("handler returned wrong status code: got %v want %v",
-			status, http.StatusOK)
+			status, http.StatusConflict)
 	}
 
 	expected := "{\"result\":\"/testalias\"}"

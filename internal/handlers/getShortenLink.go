@@ -50,7 +50,7 @@ func GetShorten(ctx config.HandlerContext, res http.ResponseWriter, req *http.Re
 
 	status := http.StatusOK
 	alias, err := ctx.Repos.GetAlias(url)
-	if err != nil && !errors.Is(err, storage.ErrURLNotFound) {
+	if err != nil && !errors.Is(err, storage.ErrAliasNotFound) {
 		http.Error(res, err.Error(), http.StatusInternalServerError)
 		return
 	}

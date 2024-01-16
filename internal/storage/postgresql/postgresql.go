@@ -107,7 +107,7 @@ func (s *Storage) GetAlias(url string) (string, error) {
 	var resAlias string
 	err := s.conn.QueryRow(context.Background(), "SELECT alias FROM url WHERE url = $1", url).Scan(&resAlias)
 	if errors.Is(err, pgx.ErrNoRows) {
-		return "", storage.ErrURLNotFound
+		return "", storage.ErrAliasNotFound
 	}
 	if err != nil {
 		return "", fmt.Errorf("%s: %w", op, err)

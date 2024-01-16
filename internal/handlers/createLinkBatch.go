@@ -37,7 +37,7 @@ func CreateLinkBatch(ctx config.HandlerContext, res http.ResponseWriter, req *ht
 
 	for _, b := range body {
 		alias, err := ctx.Repos.GetAlias(b.OriginalURL)
-		if err != nil && !errors.Is(err, storage.ErrURLNotFound) {
+		if err != nil && !errors.Is(err, storage.ErrAliasNotFound) {
 			http.Error(res, err.Error(), http.StatusInternalServerError)
 			return
 		}
