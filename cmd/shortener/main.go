@@ -22,9 +22,9 @@ func main() {
 	} else if cfg.FileDatabasePath != "" {
 		storage, err = file.New(cfg.FileDatabasePath)
 	} else if cfg.SqliteStoragePath != "" {
-		storage, err = sqlite.New(cfg.SqliteStoragePath)
-	} else {
 		storage = inmemory.New()
+	} else {
+		storage, err = sqlite.New(cfg.SqliteStoragePath)
 	}
 	if err != nil {
 		fmt.Println("Error initialize storage: %w", err)
