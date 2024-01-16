@@ -3,12 +3,12 @@ package handlers
 import (
 	"bytes"
 	"errors"
+	"github.com/grafchitaru/shortener/internal/mocks"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/grafchitaru/shortener/internal/config"
-	"github.com/grafchitaru/shortener/internal/storage/mocks"
 )
 
 func TestGetLink(t *testing.T) {

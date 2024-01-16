@@ -3,7 +3,7 @@ package handlers
 import (
 	"errors"
 	"github.com/grafchitaru/shortener/internal/config"
-	"github.com/grafchitaru/shortener/internal/storage/mocks"
+	"github.com/grafchitaru/shortener/internal/mocks"
 	"net/http"
 	"net/http/httptest"
 	"testing"
