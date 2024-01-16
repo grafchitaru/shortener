@@ -3,6 +3,7 @@ package file
 import (
 	"bufio"
 	"encoding/json"
+	"fmt"
 	"github.com/grafchitaru/shortener/internal/storage"
 	"os"
 	"path/filepath"
@@ -128,4 +129,11 @@ func (s *Storage) GetAlias(url string) (string, error) {
 	}
 
 	return "", storage.ErrAliasNotFound
+}
+
+func (s *Storage) Ping() error {
+	if _, err := os.Stat(s.filePath); os.IsNotExist(err) {
+		return fmt.Errorf("file not found: %w", err)
+	}
+	return nil
 }
