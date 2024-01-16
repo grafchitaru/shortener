@@ -43,6 +43,7 @@ func CreateLinkBatch(ctx config.HandlerContext, res http.ResponseWriter, req *ht
 		})
 	}
 
+	res.Header().Set("Content-Type", "application/json")
 	res.WriteHeader(http.StatusCreated)
 	json.NewEncoder(res).Encode(result)
 }
