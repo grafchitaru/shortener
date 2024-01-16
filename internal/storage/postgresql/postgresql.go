@@ -21,15 +21,32 @@ func New(connString string) (*Storage, error) {
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
-	_, err = conn.Exec(context.Background(), `
-   CREATE TABLE IF NOT EXISTS url(
-       id SERIAL PRIMARY KEY,
-       alias TEXT NOT NULL UNIQUE,
-       url TEXT NOT NULL);
-   CREATE INDEX IF NOT EXISTS idx_alias ON url(alias);
-   `)
+	var exists bool
+	err = conn.QueryRow(context.Background(), `
+		SELECT EXISTS (
+			SELECT 1
+			FROM  pg_class c
+			JOIN  pg_namespace n ON n.oid = c.relnamespace
+			WHERE c.relname = 'idx_alias'
+			AND   n.nspname = 'public'
+		)
+	`).Scan(&exists)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	if !exists {
+		_, err = conn.Exec(context.Background(), `
+			CREATE TABLE IF NOT EXISTS url(
+				id SERIAL PRIMARY KEY,
+				alias TEXT NOT NULL UNIQUE,
+				url TEXT NOT NULL);
+			CREATE UNIQUE INDEX idx_alias ON url(alias);
+			CREATE UNIQUE INDEX idx_url ON url(url);
+		`)
+		if err != nil {
+			return nil, fmt.Errorf("%s: %w", op, err)
+		}
 	}
 
 	return &Storage{conn: conn}, nil
@@ -38,13 +55,31 @@ func New(connString string) (*Storage, error) {
 func (s *Storage) SaveURL(urlToSave string, alias string) (int64, error) {
 	const op = "storage.postgresql.SaveURL"
 
+	tx, err := s.conn.Begin(context.Background())
+	if err != nil {
+		return 0, fmt.Errorf("%s: %w", op, err)
+	}
+	defer tx.Rollback(context.Background())
+
 	var id int64
-	err := s.conn.QueryRow(context.Background(), "INSERT INTO url(url,alias) VALUES($1,$2) RETURNING id", urlToSave, alias).Scan(&id)
+	err = tx.QueryRow(context.Background(), `
+		INSERT INTO url(url,alias) VALUES($1,$2)
+		ON CONFLICT (alias) DO NOTHING
+		RETURNING id;
+	`, urlToSave, alias).Scan(&id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return 0, fmt.Errorf("%s: %w", op, storage.ErrURLExists)
+			err := tx.QueryRow(context.Background(), "SELECT url FROM url WHERE alias=$1", alias).Scan(&urlToSave)
+			if err != nil {
+				return 0, fmt.Errorf("%s: %w", op, err)
+			}
+			return 0, fmt.Errorf("%s: URL %s already exists", op, urlToSave)
 		}
 
+		return 0, fmt.Errorf("%s: %w", op, err)
+	}
+
+	if err := tx.Commit(context.Background()); err != nil {
 		return 0, fmt.Errorf("%s: %w", op, err)
 	}
 

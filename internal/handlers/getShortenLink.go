@@ -3,8 +3,10 @@ package handlers
 import (
 	"compress/gzip"
 	"encoding/json"
+	"errors"
 	"github.com/grafchitaru/shortener/internal/app"
 	"github.com/grafchitaru/shortener/internal/config"
+	"github.com/grafchitaru/shortener/internal/storage"
 	"io"
 	"net/http"
 )
@@ -48,7 +50,16 @@ func GetShorten(ctx config.HandlerContext, res http.ResponseWriter, req *http.Re
 
 	status := http.StatusOK
 	alias, err := ctx.Repos.GetAlias(url)
-	if err != nil {
+	if err != nil && !errors.Is(err, storage.ErrURLNotFound) {
+		http.Error(res, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if alias != "" {
+		res.WriteHeader(http.StatusConflict)
+	}
+
+	if alias == "" {
 		alias = app.NewRandomString(6)
 		ctx.Repos.SaveURL(url, alias)
 		status = http.StatusCreated
