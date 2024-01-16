@@ -7,6 +7,7 @@ import (
 	storage2 "github.com/grafchitaru/shortener/internal/storage"
 	"github.com/grafchitaru/shortener/internal/storage/file"
 	"github.com/grafchitaru/shortener/internal/storage/inmemory"
+	"github.com/grafchitaru/shortener/internal/storage/postgresql"
 	"github.com/grafchitaru/shortener/internal/storage/sqlite"
 )
 
@@ -20,6 +21,8 @@ func main() {
 		storage, err = file.New(cfg.FileDatabasePath)
 	} else if cfg.UseSqlite {
 		storage, err = sqlite.New(cfg.SqliteStoragePath)
+	} else if cfg.UsePostgreSQL {
+		storage, err = postgresql.New(cfg.PostgresDatabaseDsn)
 	} else {
 		storage = inmemory.New()
 	}
