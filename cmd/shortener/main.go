@@ -17,12 +17,12 @@ func main() {
 	var storage storage2.Repositories
 	var err error
 
-	if cfg.UseDatabaseFile {
-		storage, err = file.New(cfg.FileDatabasePath)
-	} else if cfg.UseSqlite {
-		storage, err = sqlite.New(cfg.SqliteStoragePath)
-	} else if cfg.UsePostgreSQL {
+	if cfg.PostgresDatabaseDsn != "" {
 		storage, err = postgresql.New(cfg.PostgresDatabaseDsn)
+	} else if cfg.FileDatabasePath != "" {
+		storage, err = file.New(cfg.FileDatabasePath)
+	} else if cfg.SqliteStoragePath != "" {
+		storage, err = sqlite.New(cfg.SqliteStoragePath)
 	} else {
 		storage = inmemory.New()
 	}
