@@ -21,7 +21,7 @@ func main() {
 		storage, err = file.New(cfg.FileDatabasePath)
 	} else if cfg.UseSqlite {
 		storage, err = sqlite.New(cfg.SqliteStoragePath)
-	} else if cfg.UsePostgreSql {
+	} else if cfg.UsePostgreSQL {
 		storage, err = postgresql.New(cfg.PostgresDatabaseDsn)
 	} else {
 		storage = inmemory.New()

@@ -12,8 +12,8 @@ type Config struct {
 	BaseShortURL        string `env:"BASE_URL" envDefault:"http://127.0.0.1:8080"`
 	UseSqlite           bool   `env:"USE_SQLITE" envDefault:"false"`
 	SqliteStoragePath   string `env:"SQLITE_STORAGE_PATH" envDefault:"././internal/storage/storage.db"`
-	UseDatabaseFile     bool   `env:"USE_DATABASE_FILE" envDefault:"false"`
-	UsePostgreSql       bool   `env:"USE_POSTGRESQL" envDefault:"true"`
+	UseDatabaseFile     bool   `env:"USE_DATABASE_FILE" envDefault:"true"`
+	UsePostgreSQL       bool   `env:"USE_POSTGRESQL" envDefault:"false"`
 	FileDatabasePath    string `env:"FILE_STORAGE_PATH" envDefault:"/tmp/short-url-db.json"`
 	PostgresDatabaseDsn string `env:"DATABASE_DSN" envDefault:"postgres://root:root@localhost:54321/app"`
 }
