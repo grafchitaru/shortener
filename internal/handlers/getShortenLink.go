@@ -48,6 +48,8 @@ func GetShorten(ctx config.HandlerContext, res http.ResponseWriter, req *http.Re
 	}
 	url := link.URL
 
+	res.Header().Set("Content-Type", "application/json")
+
 	status := http.StatusOK
 	alias, err := ctx.Repos.GetAlias(url)
 	if err != nil && !errors.Is(err, storage.ErrAliasNotFound) {
@@ -74,7 +76,6 @@ func GetShorten(ctx config.HandlerContext, res http.ResponseWriter, req *http.Re
 		return
 	}
 
-	res.Header().Set("Content-Type", "application/json")
 	res.WriteHeader(status)
 	res.Write([]byte(resp))
 }
