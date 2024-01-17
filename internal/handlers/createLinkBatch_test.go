@@ -34,6 +34,10 @@ func TestCreateLinkBatch(t *testing.T) {
 		t.Errorf("handler returned wrong status code: got %v want %v",
 			status, http.StatusCreated)
 	}
+	if contentType := rr.Header().Get("Content-Type"); contentType != "application/json" {
+		t.Errorf("handler returned wrong header content type: got %v want %v",
+			contentType, "application/json")
+	}
 
 	var result []storage.BatchResult
 	if err := json.Unmarshal(rr.Body.Bytes(), &result); err != nil {

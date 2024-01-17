@@ -3,6 +3,7 @@ package handlers
 import (
 	"compress/gzip"
 	"encoding/json"
+	"errors"
 	"github.com/grafchitaru/shortener/internal/app"
 	"github.com/grafchitaru/shortener/internal/config"
 	"github.com/grafchitaru/shortener/internal/storage"
@@ -34,16 +35,34 @@ func CreateLinkBatch(ctx config.HandlerContext, res http.ResponseWriter, req *ht
 
 	var result []storage.BatchResult
 
+	res.Header().Set("Content-Type", "application/json")
+
 	for _, b := range body {
-		alias := app.NewRandomString(6)
-		ctx.Repos.SaveURL(b.OriginalURL, alias)
+		alias, err := ctx.Repos.GetAlias(b.OriginalURL)
+		if err != nil && !errors.Is(err, storage.ErrAliasNotFound) {
+			http.Error(res, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if alias != "" {
+			res.WriteHeader(http.StatusConflict)
+		}
+
+		if alias == "" {
+			alias = app.NewRandomString(6)
+			_, err = ctx.Repos.SaveURL(b.OriginalURL, alias)
+			if err != nil {
+				http.Error(res, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			res.WriteHeader(http.StatusCreated)
+		}
+
 		result = append(result, storage.BatchResult{
 			CorrelationID: b.CorrelationID,
 			ShortURL:      ctx.Config.BaseShortURL + "/" + alias,
 		})
 	}
 
-	res.Header().Set("Content-Type", "application/json")
-	res.WriteHeader(http.StatusCreated)
 	json.NewEncoder(res).Encode(result)
 }
