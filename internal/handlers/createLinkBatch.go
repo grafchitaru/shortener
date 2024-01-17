@@ -35,6 +35,8 @@ func CreateLinkBatch(ctx config.HandlerContext, res http.ResponseWriter, req *ht
 
 	var result []storage.BatchResult
 
+	res.Header().Set("Content-Type", "application/json")
+
 	for _, b := range body {
 		alias, err := ctx.Repos.GetAlias(b.OriginalURL)
 		if err != nil && !errors.Is(err, storage.ErrAliasNotFound) {
@@ -61,8 +63,6 @@ func CreateLinkBatch(ctx config.HandlerContext, res http.ResponseWriter, req *ht
 			ShortURL:      ctx.Config.BaseShortURL + "/" + alias,
 		})
 	}
-
-	res.Header().Set("Content-Type", "application/json")
 
 	json.NewEncoder(res).Encode(result)
 }
