@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"compress/gzip"
-	"encoding/json"
 	"errors"
 	"github.com/grafchitaru/shortener/internal/app"
 	"github.com/grafchitaru/shortener/internal/config"
@@ -32,8 +31,7 @@ func CreateLink(ctx config.HandlerContext, res http.ResponseWriter, req *http.Re
 		return
 	}
 
-	var originalURL string
-	json.Unmarshal(body, &originalURL)
+	originalURL := string(body)
 
 	alias, err := ctx.Repos.GetAlias(originalURL)
 	if err != nil && !errors.Is(err, storage.ErrAliasNotFound) {
