@@ -21,32 +21,15 @@ func New(connString string) (*Storage, error) {
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
-	var exists bool
-	err = conn.QueryRow(context.Background(), `
-		SELECT EXISTS (
-			SELECT 1
-			FROM  pg_class c
-			JOIN  pg_namespace n ON n.oid = c.relnamespace
-			WHERE c.relname = 'idx_alias'
-			AND   n.nspname = 'public'
-		)
-	`).Scan(&exists)
+	_, err = conn.Exec(context.Background(), `
+		CREATE TABLE IF NOT EXISTS url(
+			id SERIAL PRIMARY KEY,
+			alias TEXT NOT NULL UNIQUE,
+			url TEXT NOT NULL UNIQUE
+);
+		`)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", op, err)
-	}
-
-	if !exists {
-		_, err = conn.Exec(context.Background(), `
-			CREATE TABLE IF NOT EXISTS url(
-				id SERIAL PRIMARY KEY,
-				alias TEXT NOT NULL UNIQUE,
-				url TEXT NOT NULL);
-			CREATE UNIQUE INDEX idx_alias ON url(alias);
-			CREATE UNIQUE INDEX idx_url ON url(url);
-		`)
-		if err != nil {
-			return nil, fmt.Errorf("%s: %w", op, err)
-		}
 	}
 
 	return &Storage{conn: conn}, nil
