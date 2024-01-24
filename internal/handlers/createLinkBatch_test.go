@@ -5,6 +5,7 @@ import (
 	"github.com/grafchitaru/shortener/internal/config"
 	"github.com/grafchitaru/shortener/internal/mocks"
 	"github.com/grafchitaru/shortener/internal/storage"
+	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -30,14 +31,8 @@ func TestCreateLinkBatch(t *testing.T) {
 	rr := httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
 
-	if status := rr.Code; status != http.StatusCreated {
-		t.Errorf("handler returned wrong status code: got %v want %v",
-			status, http.StatusCreated)
-	}
-	if contentType := rr.Header().Get("Content-Type"); contentType != "application/json" {
-		t.Errorf("handler returned wrong header content type: got %v want %v",
-			contentType, "application/json")
-	}
+	assert.Equal(t, http.StatusCreated, rr.Code, "handler returned wrong status code")
+	assert.Equal(t, rr.Header().Get("Content-Type"), "application/json", "handler returned wrong header content type")
 
 	var result []storage.BatchResult
 	if err := json.Unmarshal(rr.Body.Bytes(), &result); err != nil {
@@ -45,11 +40,6 @@ func TestCreateLinkBatch(t *testing.T) {
 	}
 
 	for _, r := range result {
-		expected := cfg.BaseShortURL
-
-		if !strings.Contains(r.ShortURL, expected) {
-			t.Errorf("handler returned unexpected short URL for correlation ID %v: got %v want %v",
-				r.CorrelationID, r.ShortURL, expected)
-		}
+		assert.Contains(t, r.ShortURL, cfg.BaseShortURL, "handler returned unexpected short URL for correlation")
 	}
 }

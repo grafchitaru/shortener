@@ -3,6 +3,7 @@ package handlers
 import (
 	"github.com/grafchitaru/shortener/internal/config"
 	"github.com/grafchitaru/shortener/internal/mocks"
+	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -28,14 +29,6 @@ func TestCreateLink(t *testing.T) {
 	rr := httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
 
-	if status := rr.Code; status != http.StatusCreated {
-		t.Errorf("handler returned wrong status code: got %v want %v",
-			status, http.StatusCreated)
-	}
-
-	expected := cfg.BaseShortURL
-	if rr.Body.String()[:len(expected)] != expected {
-		t.Errorf("handler returned unexpected body: got %v want %v",
-			rr.Body.String(), expected)
-	}
+	assert.Equal(t, http.StatusCreated, rr.Code, "handler returned wrong status code")
+	assert.Equal(t, rr.Body.String()[:len(cfg.BaseShortURL)], cfg.BaseShortURL, "handler returned unexpected body")
 }
