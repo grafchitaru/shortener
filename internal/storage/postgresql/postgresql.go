@@ -38,7 +38,10 @@ func New(connString string) (*Storage, error) {
 func (s *Storage) SaveURL(urlToSave string, alias string) (int64, error) {
 	const op = "storage.postgresql.SaveURL"
 
-	tx, err := s.conn.Begin(context.Background())
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+	tx, err := s.conn.Begin(ctx)
+
 	if err != nil {
 		return 0, fmt.Errorf("%s: %w", op, err)
 	}
