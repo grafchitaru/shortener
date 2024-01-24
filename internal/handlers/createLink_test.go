@@ -4,6 +4,7 @@ import (
 	"github.com/grafchitaru/shortener/internal/config"
 	"github.com/grafchitaru/shortener/internal/mocks"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -22,9 +23,7 @@ func TestCreateLink(t *testing.T) {
 	})
 
 	req, err := http.NewRequest("POST", "/create", strings.NewReader("http://test.com"))
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 
 	rr := httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)

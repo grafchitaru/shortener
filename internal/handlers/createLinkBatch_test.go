@@ -6,6 +6,7 @@ import (
 	"github.com/grafchitaru/shortener/internal/mocks"
 	"github.com/grafchitaru/shortener/internal/storage"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -24,9 +25,7 @@ func TestCreateLinkBatch(t *testing.T) {
 
 	batchURLs := `[{"originalURL":"http://test1.com","correlationID":"1"}, {"originalURL":"http://test2.com","correlationID":"2"}]`
 	req, err := http.NewRequest("POST", "/api/shorten/batch", strings.NewReader(batchURLs))
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 
 	rr := httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
