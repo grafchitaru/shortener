@@ -1,3 +1,8 @@
+```
+make up 
+make test
+```
+
 # go-musthave-shortener-tpl
 
 Шаблон репозитория для трека «Сервис сокращения URL».

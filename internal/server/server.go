@@ -17,6 +17,14 @@ func New(ctx config.HandlerContext) {
 	r.Use(logger.WithLogging)
 	r.Use(compress.WithCompressionResponse)
 
+	r.Post("/api/shorten/batch", func(res http.ResponseWriter, req *http.Request) {
+		handlers.CreateLinkBatch(ctx, res, req)
+	})
+
+	r.Get("/ping", func(res http.ResponseWriter, req *http.Request) {
+		handlers.Ping(ctx, res)
+	})
+
 	r.Get("/{id}", func(res http.ResponseWriter, req *http.Request) {
 		handlers.GetLink(ctx, res, req)
 	})

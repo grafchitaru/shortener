@@ -1,52 +1,42 @@
 package handlers
 
 import (
-	"bytes"
 	"errors"
+	"github.com/grafchitaru/shortener/internal/config"
 	"github.com/grafchitaru/shortener/internal/mocks"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-
-	"github.com/grafchitaru/shortener/internal/config"
 )
 
-func TestGetLink(t *testing.T) {
+func TestPing(t *testing.T) {
 	tests := []struct {
 		name           string
 		mockStorage    *mocks.MockStorage
 		expectedStatus int
 	}{
 		{
-			name: "Error when getting URL",
+			name: "Error when pinging database",
 			mockStorage: &mocks.MockStorage{
-				SaveURLError:   nil,
-				SaveURLID:      1,
-				GetURLError:    errors.New("some error"),
-				GetURLResult:   "",
-				GetAliasResult: "",
+				PingError: errors.New("some error"),
 			},
-			expectedStatus: http.StatusNotFound,
+			expectedStatus: http.StatusInternalServerError,
 		},
 		{
 			name: "Successful operation",
 			mockStorage: &mocks.MockStorage{
-				SaveURLError:   nil,
-				SaveURLID:      1,
-				GetURLError:    nil,
-				GetURLResult:   "http://example.com",
-				GetAliasResult: "tUaOlJ",
+				PingError: nil,
 			},
-			expectedStatus: http.StatusTemporaryRedirect,
+			expectedStatus: http.StatusOK,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			r := httptest.NewRecorder()
-			req, _ := http.NewRequest("GET", "/tUaOlJ", bytes.NewBufferString(""))
+			http.NewRequest("GET", "/ping", nil)
 			ctx := config.HandlerContext{Repos: tt.mockStorage}
-			GetLink(ctx, r, req)
+			Ping(ctx, r)
 			if status := r.Code; status != tt.expectedStatus {
 				t.Errorf("handler returned wrong status code: got %v want %v", status, tt.expectedStatus)
 			}

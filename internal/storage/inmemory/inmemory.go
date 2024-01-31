@@ -47,3 +47,7 @@ func (r *Repositories) GetAlias(url string) (string, error) {
 
 	return "", storage.ErrAliasNotFound
 }
+
+func (r *Repositories) Ping() error {
+	return nil
+}

@@ -105,3 +105,7 @@ func (s *Storage) GetAlias(url string) (string, error) {
 
 	return resAlias, nil
 }
+
+func (s *Storage) Ping() error {
+	return s.db.Ping()
+}

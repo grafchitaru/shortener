@@ -4,7 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/grafchitaru/shortener/internal/config"
-	"github.com/grafchitaru/shortener/internal/storage/mocks"
+	"github.com/grafchitaru/shortener/internal/mocks"
+	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -23,17 +24,15 @@ func TestGetShorten(t *testing.T) {
 		URL: "http://test.com",
 	}
 	linkJSON, _ := json.Marshal(link)
-	req, err := http.NewRequest("POST", "/shorten", bytes.NewBuffer(linkJSON))
-	if err != nil {
-		t.Fatal(err)
-	}
+	req, err := http.NewRequest("POST", "/api/shorten", bytes.NewBuffer(linkJSON))
+	require.NoError(t, err)
 
 	rr := httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
 
-	if status := rr.Code; status != http.StatusOK {
+	if status := rr.Code; status != http.StatusConflict {
 		t.Errorf("handler returned wrong status code: got %v want %v",
-			status, http.StatusOK)
+			status, http.StatusConflict)
 	}
 
 	expected := "{\"result\":\"/testalias\"}"

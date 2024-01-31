@@ -1,0 +1,25 @@
+services:
+  postgresql:
+    build:
+      dockerfile: ./docker/postgres/Dockerfile
+      context: .
+    ports:
+      - 54321:5432
+    environment:
+      - POSTGRES_DB=app
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_USER=root
+    volumes:
+      - postgresql-volume:/var/lib/postgresql:rw
+    networks:
+      - default
+    healthcheck:
+      test: ["CMD", "pg_isready"]
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgresql-volume:
+
+networks:
+  default:
