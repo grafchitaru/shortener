@@ -62,6 +62,7 @@ func WithLogging(next http.Handler) http.Handler {
 			"duration", duration,
 			"size", responseData.size,
 			"cookie", r.Cookies(),
+			"authorization", r.Header.Get("Authorization"),
 		)
 	})
 }
