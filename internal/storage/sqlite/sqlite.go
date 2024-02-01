@@ -91,11 +91,11 @@ func (s *Storage) GetUserURLs(UserID string, baseURL string) ([]storage.ShortURL
 	const op = "storage.sqlite.GetURL"
 
 	rows, err := s.db.Query("SELECT url, alias FROM url WHERE user_id = $1", UserID)
-	if errors.Is(err, pgx.ErrNoRows) {
-		return nil, storage.ErrURLNotFound
-	}
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, storage.ErrURLNotFound
 	}
 
 	urls := make([]storage.ShortURL, 0)
