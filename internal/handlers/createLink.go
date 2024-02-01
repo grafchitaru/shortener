@@ -40,7 +40,7 @@ func CreateLink(ctx config.HandlerContext, res http.ResponseWriter, req *http.Re
 		return
 	}
 
-	userId, err := auth.GetUserId(req, ctx.Config.SecretKey)
+	userID, err := auth.GetUserID(req, ctx.Config.SecretKey)
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusUnauthorized)
 		return
@@ -52,7 +52,7 @@ func CreateLink(ctx config.HandlerContext, res http.ResponseWriter, req *http.Re
 
 	if alias == "" {
 		alias = app.NewRandomString(6)
-		_, err = ctx.Repos.SaveURL(originalURL, alias, userId)
+		_, err = ctx.Repos.SaveURL(originalURL, alias, userID)
 		if err != nil {
 			http.Error(res, err.Error(), http.StatusInternalServerError)
 			return

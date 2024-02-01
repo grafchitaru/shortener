@@ -36,7 +36,7 @@ func New(connString string) (*Storage, error) {
 	return &Storage{conn: conn}, nil
 }
 
-func (s *Storage) SaveURL(urlToSave string, alias string, userId string) (int64, error) {
+func (s *Storage) SaveURL(urlToSave string, alias string, userID string) (int64, error) {
 	const op = "storage.postgresql.SaveURL"
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
@@ -53,7 +53,7 @@ func (s *Storage) SaveURL(urlToSave string, alias string, userId string) (int64,
 		INSERT INTO url(url, alias, user_id) VALUES($1, $2, $3)
 		ON CONFLICT (alias) DO NOTHING
 		RETURNING id;
-	`, urlToSave, alias, userId).Scan(&id)
+	`, urlToSave, alias, userID).Scan(&id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			err := tx.QueryRow(context.Background(), "SELECT url FROM url WHERE alias=$1", alias).Scan(&urlToSave)
@@ -88,10 +88,10 @@ func (s *Storage) GetURL(alias string) (string, error) {
 	return resURL, nil
 }
 
-func (s *Storage) GetUserURLs(UserId string, BaseUrl string) ([]storage.ShortURL, error) {
+func (s *Storage) GetUserURLs(UserID string, BaseUrl string) ([]storage.ShortURL, error) {
 	const op = "storage.postgresql.GetURL"
 
-	rows, err := s.conn.Query(context.Background(), "SELECT url, alias FROM url WHERE user_id = $1", UserId)
+	rows, err := s.conn.Query(context.Background(), "SELECT url, alias FROM url WHERE user_id = $1", UserID)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, storage.ErrURLNotFound
 	}

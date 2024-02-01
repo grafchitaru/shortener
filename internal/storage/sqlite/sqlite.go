@@ -41,7 +41,7 @@ func New(storagePath string) (*Storage, error) {
 	return &Storage{db: db}, nil
 }
 
-func (s *Storage) SaveURL(urlToSave string, alias string, userId string) (int64, error) {
+func (s *Storage) SaveURL(urlToSave string, alias string, userID string) (int64, error) {
 	const op = "storage.sqlite.SaveURL"
 
 	stmt, err := s.db.Prepare("INSERT INTO url(url, alias, user_id) values(?, ?, ?)")
@@ -87,10 +87,10 @@ func (s *Storage) GetURL(alias string) (string, error) {
 	return resURL, nil
 }
 
-func (s *Storage) GetUserURLs(UserId string, baseUrl string) ([]storage.ShortURL, error) {
+func (s *Storage) GetUserURLs(UserID string, baseUrl string) ([]storage.ShortURL, error) {
 	const op = "storage.sqlite.GetURL"
 
-	rows, err := s.db.Query("SELECT url, alias FROM url WHERE user_id = $1", UserId)
+	rows, err := s.db.Query("SELECT url, alias FROM url WHERE user_id = $1", UserID)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, storage.ErrURLNotFound
 	}

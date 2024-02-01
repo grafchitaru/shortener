@@ -16,7 +16,7 @@ func New() *Repositories {
 	}
 }
 
-func (r *Repositories) SaveURL(urlToSave string, alias string, userId string) (int64, error) {
+func (r *Repositories) SaveURL(urlToSave string, alias string, userID string) (int64, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -35,7 +35,7 @@ func (r *Repositories) GetURL(alias string) (string, error) {
 	return url, nil
 }
 
-func (r *Repositories) GetUserURLs(UserId string, baseUrl string) ([]storage.ShortURL, error) {
+func (r *Repositories) GetUserURLs(UserID string, baseUrl string) ([]storage.ShortURL, error) {
 	return nil, nil
 }
 

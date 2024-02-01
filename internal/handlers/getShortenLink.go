@@ -62,7 +62,7 @@ func GetShorten(ctx config.HandlerContext, res http.ResponseWriter, req *http.Re
 		res.WriteHeader(http.StatusConflict)
 	}
 
-	userId, err := auth.GetUserId(req, ctx.Config.SecretKey)
+	userID, err := auth.GetUserID(req, ctx.Config.SecretKey)
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusUnauthorized)
 		return
@@ -70,7 +70,7 @@ func GetShorten(ctx config.HandlerContext, res http.ResponseWriter, req *http.Re
 
 	if alias == "" {
 		alias = app.NewRandomString(6)
-		ctx.Repos.SaveURL(url, alias, userId)
+		ctx.Repos.SaveURL(url, alias, userID)
 		status = http.StatusCreated
 	}
 

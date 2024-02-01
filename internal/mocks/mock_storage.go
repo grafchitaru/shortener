@@ -13,7 +13,7 @@ type MockStorage struct {
 	GetURLsResult  []storage.ShortURL
 }
 
-func (ms *MockStorage) SaveURL(urlToSave string, alias string, userId string) (int64, error) {
+func (ms *MockStorage) SaveURL(urlToSave string, alias string, userID string) (int64, error) {
 	return ms.SaveURLID, ms.SaveURLError
 }
 
@@ -21,7 +21,7 @@ func (ms *MockStorage) GetURL(alias string) (string, error) {
 	return ms.GetURLResult, ms.GetURLError
 }
 
-func (ms *MockStorage) GetUserURLs(userId string, baseUrl string) ([]storage.ShortURL, error) {
+func (ms *MockStorage) GetUserURLs(userID string, baseUrl string) ([]storage.ShortURL, error) {
 	return ms.GetURLsResult, ms.GetURLError
 }
 

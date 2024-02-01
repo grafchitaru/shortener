@@ -31,7 +31,7 @@ func New(filePath string) (*Storage, error) {
 	return &Storage{filePath: filePath}, nil
 }
 
-func (s *Storage) SaveURL(urlToSave string, alias string, userId string) (int64, error) {
+func (s *Storage) SaveURL(urlToSave string, alias string, userID string) (int64, error) {
 	type URLData struct {
 		UUID        string `json:"uuid"`
 		ShortURL    string `json:"short_url"`
@@ -135,7 +135,7 @@ func (s *Storage) GetAlias(url string) (string, error) {
 	return "", storage.ErrAliasNotFound
 }
 
-func (s *Storage) GetUserURLs(UserId string, baseUrl string) ([]storage.ShortURL, error) {
+func (s *Storage) GetUserURLs(UserID string, baseUrl string) ([]storage.ShortURL, error) {
 	f, err := os.Open(s.filePath)
 	if err != nil {
 		return nil, err
@@ -151,7 +151,7 @@ func (s *Storage) GetUserURLs(UserId string, baseUrl string) ([]storage.ShortURL
 			continue
 		}
 
-		if url.UserID == UserId {
+		if url.UserID == UserID {
 			urls = append(urls, storage.ShortURL{
 				ShortURL:    baseUrl + url.CorrelationID,
 				OriginalURL: url.OriginalURL,

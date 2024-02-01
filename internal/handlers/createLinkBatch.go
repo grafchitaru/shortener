@@ -45,7 +45,7 @@ func CreateLinkBatch(ctx config.HandlerContext, res http.ResponseWriter, req *ht
 			return
 		}
 
-		userId, err := auth.GetUserId(req, ctx.Config.SecretKey)
+		userID, err := auth.GetUserID(req, ctx.Config.SecretKey)
 		if err != nil {
 			http.Error(res, err.Error(), http.StatusUnauthorized)
 			return
@@ -57,7 +57,7 @@ func CreateLinkBatch(ctx config.HandlerContext, res http.ResponseWriter, req *ht
 
 		if alias == "" {
 			alias = app.NewRandomString(6)
-			_, err = ctx.Repos.SaveURL(b.OriginalURL, alias, userId)
+			_, err = ctx.Repos.SaveURL(b.OriginalURL, alias, userID)
 			if err != nil {
 				http.Error(res, err.Error(), http.StatusInternalServerError)
 				return

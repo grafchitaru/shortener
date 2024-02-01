@@ -8,14 +8,14 @@ import (
 )
 
 func GetUserUrls(ctx config.HandlerContext, res http.ResponseWriter, req *http.Request) {
-	userId, err := auth.GetUserId(req, ctx.Config.SecretKey)
+	userID, err := auth.GetUserID(req, ctx.Config.SecretKey)
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusUnauthorized)
 		return
 	}
 
 	baseUrl := ctx.Config.BaseShortURL + "/"
-	aliases, err := ctx.Repos.GetUserURLs(userId, baseUrl)
+	aliases, err := ctx.Repos.GetUserURLs(userID, baseUrl)
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusNoContent)
 		return

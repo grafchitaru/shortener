@@ -7,9 +7,9 @@ import (
 	"net/http"
 )
 
-func GenerateToken(userId uuid.UUID, secretKey string) (string, error) {
+func GenerateToken(userID uuid.UUID, secretKey string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"user_id": userId.String(),
+		"user_id": userID.String(),
 	})
 
 	tokenString, err := token.SignedString([]byte(secretKey))
@@ -25,8 +25,8 @@ func WithUserCookie(ctx config.HandlerContext) func(next http.Handler) http.Hand
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			cookie, err := r.Cookie("token")
 			if err != nil || cookie.Value == "" {
-				userId := uuid.New()
-				token, _ := GenerateToken(userId, ctx.Config.SecretKey)
+				userID := uuid.New()
+				token, _ := GenerateToken(userID, ctx.Config.SecretKey)
 
 				http.SetCookie(w, &http.Cookie{
 					Name:  "token",
@@ -39,8 +39,8 @@ func WithUserCookie(ctx config.HandlerContext) func(next http.Handler) http.Hand
 				})
 
 				if err != nil {
-					userId := uuid.New()
-					token, _ := GenerateToken(userId, ctx.Config.SecretKey)
+					userID := uuid.New()
+					token, _ := GenerateToken(userID, ctx.Config.SecretKey)
 
 					http.SetCookie(w, &http.Cookie{
 						Name:  "token",
@@ -55,7 +55,7 @@ func WithUserCookie(ctx config.HandlerContext) func(next http.Handler) http.Hand
 	}
 }
 
-func GetUserId(req *http.Request, secretKey string) (string, error) {
+func GetUserID(req *http.Request, secretKey string) (string, error) {
 	cookie, err := req.Cookie("token")
 	if err != nil {
 		return "", err
