@@ -4,6 +4,7 @@ import (
 	"compress/gzip"
 	"encoding/json"
 	"errors"
+	"github.com/google/uuid"
 	"github.com/grafchitaru/shortener/internal/app"
 	"github.com/grafchitaru/shortener/internal/auth"
 	"github.com/grafchitaru/shortener/internal/config"
@@ -47,8 +48,7 @@ func CreateLinkBatch(ctx config.HandlerContext, res http.ResponseWriter, req *ht
 
 		userID, err := auth.GetUserID(req, ctx.Config.SecretKey)
 		if err != nil {
-			http.Error(res, err.Error(), http.StatusUnauthorized)
-			return
+			userID = uuid.New().String()
 		}
 
 		if alias != "" {
