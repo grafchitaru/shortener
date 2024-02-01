@@ -42,11 +42,14 @@ func WithUserCookie(ctx config.HandlerContext) func(next http.Handler) http.Hand
 					userID := uuid.New()
 					token, _ := GenerateToken(userID, ctx.Config.SecretKey)
 
+					w.Header().Add("Authorization", "Bearer "+token)
+					r.Header.Add("Authorization", "Bearer "+token)
 					http.SetCookie(w, &http.Cookie{
 						Name:  "token",
 						Value: token,
 						Path:  "/",
 					})
+					r.AddCookie(cookie)
 				}
 			}
 
