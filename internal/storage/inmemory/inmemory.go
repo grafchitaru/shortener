@@ -35,7 +35,7 @@ func (r *Repositories) GetURL(alias string) (string, error) {
 	return url, nil
 }
 
-func (r *Repositories) GetUserURLs(UserID string, baseUrl string) ([]storage.ShortURL, error) {
+func (r *Repositories) GetUserURLs(UserID string, baseURL string) ([]storage.ShortURL, error) {
 	return nil, nil
 }
 

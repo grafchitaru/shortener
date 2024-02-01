@@ -135,7 +135,7 @@ func (s *Storage) GetAlias(url string) (string, error) {
 	return "", storage.ErrAliasNotFound
 }
 
-func (s *Storage) GetUserURLs(UserID string, baseUrl string) ([]storage.ShortURL, error) {
+func (s *Storage) GetUserURLs(UserID string, baseURL string) ([]storage.ShortURL, error) {
 	f, err := os.Open(s.filePath)
 	if err != nil {
 		return nil, err
@@ -153,7 +153,7 @@ func (s *Storage) GetUserURLs(UserID string, baseUrl string) ([]storage.ShortURL
 
 		if url.UserID == UserID {
 			urls = append(urls, storage.ShortURL{
-				ShortURL:    baseUrl + url.CorrelationID,
+				ShortURL:    baseURL + url.CorrelationID,
 				OriginalURL: url.OriginalURL,
 			})
 		}

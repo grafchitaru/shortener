@@ -19,7 +19,7 @@ type ShortURL struct {
 type Repositories interface {
 	SaveURL(urlToSave string, alias string, userID string) (int64, error)
 	GetURL(alias string) (string, error)
-	GetUserURLs(userID string, baseUrl string) ([]ShortURL, error)
+	GetUserURLs(userID string, baseURL string) ([]ShortURL, error)
 	GetAlias(url string) (string, error)
 	Ping() error
 }

@@ -21,7 +21,7 @@ func (ms *MockStorage) GetURL(alias string) (string, error) {
 	return ms.GetURLResult, ms.GetURLError
 }
 
-func (ms *MockStorage) GetUserURLs(userID string, baseUrl string) ([]storage.ShortURL, error) {
+func (ms *MockStorage) GetUserURLs(userID string, baseURL string) ([]storage.ShortURL, error) {
 	return ms.GetURLsResult, ms.GetURLError
 }
 

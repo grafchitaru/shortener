@@ -87,7 +87,7 @@ func (s *Storage) GetURL(alias string) (string, error) {
 	return resURL, nil
 }
 
-func (s *Storage) GetUserURLs(UserID string, baseUrl string) ([]storage.ShortURL, error) {
+func (s *Storage) GetUserURLs(UserID string, baseURL string) ([]storage.ShortURL, error) {
 	const op = "storage.sqlite.GetURL"
 
 	rows, err := s.db.Query("SELECT url, alias FROM url WHERE user_id = $1", UserID)
@@ -105,7 +105,7 @@ func (s *Storage) GetUserURLs(UserID string, baseUrl string) ([]storage.ShortURL
 		if err != nil {
 			return nil, fmt.Errorf("%s: %w", op, err)
 		}
-		url.ShortURL = baseUrl + url.ShortURL
+		url.ShortURL = baseURL + url.ShortURL
 		urls = append(urls, url)
 	}
 

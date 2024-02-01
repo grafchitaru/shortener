@@ -14,8 +14,8 @@ func GetUserUrls(ctx config.HandlerContext, res http.ResponseWriter, req *http.R
 		return
 	}
 
-	baseUrl := ctx.Config.BaseShortURL + "/"
-	aliases, err := ctx.Repos.GetUserURLs(userID, baseUrl)
+	baseURL := ctx.Config.BaseShortURL + "/"
+	aliases, err := ctx.Repos.GetUserURLs(userID, baseURL)
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusNoContent)
 		return
