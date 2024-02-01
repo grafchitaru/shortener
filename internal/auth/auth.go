@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"fmt"
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
 	"github.com/grafchitaru/shortener/internal/config"
@@ -25,7 +26,11 @@ func WithUserCookie(ctx config.HandlerContext) func(next http.Handler) http.Hand
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			cookie, err := r.Cookie("token")
 			if err != nil || cookie.Value == "" {
-				userID := uuid.New()
+				userID, err := uuid.Parse("00000000-0000-0000-0000-000000000000")
+				if err != nil {
+					fmt.Println("Error:", err)
+					return
+				}
 				token, _ := GenerateToken(userID, ctx.Config.SecretKey)
 
 				http.SetCookie(w, &http.Cookie{
@@ -39,7 +44,11 @@ func WithUserCookie(ctx config.HandlerContext) func(next http.Handler) http.Hand
 				})
 
 				if err != nil {
-					userID := uuid.New()
+					userID, err := uuid.Parse("00000000-0000-0000-0000-000000000000")
+					if err != nil {
+						fmt.Println("Error:", err)
+						return
+					}
 					token, _ := GenerateToken(userID, ctx.Config.SecretKey)
 
 					//nolint:exhaustruct
