@@ -88,7 +88,7 @@ func (s *Storage) GetURL(alias string) (string, error) {
 	return resURL, nil
 }
 
-func (s *Storage) GetUserURLs(UserID string, BaseUrl string) ([]storage.ShortURL, error) {
+func (s *Storage) GetUserURLs(UserID string, BaseURL string) ([]storage.ShortURL, error) {
 	const op = "storage.postgresql.GetURL"
 
 	rows, err := s.conn.Query(context.Background(), "SELECT url, alias FROM url WHERE user_id = $1", UserID)
@@ -106,7 +106,7 @@ func (s *Storage) GetUserURLs(UserID string, BaseUrl string) ([]storage.ShortURL
 		if err != nil {
 			return nil, fmt.Errorf("%s: %w", op, err)
 		}
-		url.ShortURL = BaseUrl + url.ShortURL
+		url.ShortURL = BaseURL + url.ShortURL
 		urls = append(urls, url)
 	}
 
