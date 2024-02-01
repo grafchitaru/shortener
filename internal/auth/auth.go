@@ -44,11 +44,7 @@ func WithUserCookie(ctx config.HandlerContext) func(next http.Handler) http.Hand
 				})
 
 				if err != nil {
-					userID, err := uuid.Parse("00000000-0000-0000-0000-000000000000")
-					if err != nil {
-						fmt.Println("Error:", err)
-						return
-					}
+					userID := uuid.New()
 					token, _ := GenerateToken(userID, ctx.Config.SecretKey)
 
 					//nolint:exhaustruct

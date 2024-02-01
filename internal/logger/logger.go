@@ -62,7 +62,7 @@ func WithLogging(next http.Handler) http.Handler {
 			"duration", duration,
 			"size", responseData.size,
 			"cookie", r.Cookies(),
-			"bearer", r.Header.Get("Bearer"),
+			"bearer", r.Header.Get("Authorization"),
 		)
 	})
 }
