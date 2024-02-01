@@ -97,6 +97,19 @@ func (s *Storage) GetUserURLs(UserID string, baseURL string) ([]storage.ShortURL
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, storage.ErrURLNotFound
 	}
+	defer rows.Close()
+
+	for rows.Next() {
+		// process rows here
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, storage.ErrURLNotFound
+	}
 
 	urls := make([]storage.ShortURL, 0)
 	for rows.Next() {
