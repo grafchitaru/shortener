@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"github.com/google/uuid"
+	"github.com/grafchitaru/shortener/internal/auth"
 	"github.com/grafchitaru/shortener/internal/config"
 	"github.com/grafchitaru/shortener/internal/mocks"
 	"github.com/stretchr/testify/assert"
@@ -24,6 +26,14 @@ func TestCreateLink(t *testing.T) {
 
 	req, err := http.NewRequest("POST", "/create", strings.NewReader("http://test.com"))
 	require.NoError(t, err)
+
+	token, err := auth.GenerateToken(uuid.New(), cfg.SecretKey)
+	require.NoError(t, err)
+	req.AddCookie(&http.Cookie{
+		Name:  "token",
+		Value: token,
+		Path:  "/",
+	})
 
 	rr := httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)

@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"encoding/json"
+	"github.com/google/uuid"
+	"github.com/grafchitaru/shortener/internal/auth"
 	"github.com/grafchitaru/shortener/internal/config"
 	"github.com/grafchitaru/shortener/internal/mocks"
 	"github.com/grafchitaru/shortener/internal/storage"
@@ -26,6 +28,14 @@ func TestCreateLinkBatch(t *testing.T) {
 	batchURLs := `[{"originalURL":"http://test1.com","correlationID":"1"}, {"originalURL":"http://test2.com","correlationID":"2"}]`
 	req, err := http.NewRequest("POST", "/api/shorten/batch", strings.NewReader(batchURLs))
 	require.NoError(t, err)
+
+	token, err := auth.GenerateToken(uuid.New(), cfg.SecretKey)
+	require.NoError(t, err)
+	req.AddCookie(&http.Cookie{
+		Name:  "token",
+		Value: token,
+		Path:  "/",
+	})
 
 	rr := httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)

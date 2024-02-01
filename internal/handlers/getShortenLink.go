@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/grafchitaru/shortener/internal/app"
+	"github.com/grafchitaru/shortener/internal/auth"
 	"github.com/grafchitaru/shortener/internal/config"
 	"github.com/grafchitaru/shortener/internal/storage"
 	"io"
@@ -61,9 +62,15 @@ func GetShorten(ctx config.HandlerContext, res http.ResponseWriter, req *http.Re
 		res.WriteHeader(http.StatusConflict)
 	}
 
+	userId, err := auth.GetUserId(req, ctx.Config.SecretKey)
+	if err != nil {
+		http.Error(res, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
 	if alias == "" {
 		alias = app.NewRandomString(6)
-		ctx.Repos.SaveURL(url, alias)
+		ctx.Repos.SaveURL(url, alias, userId)
 		status = http.StatusCreated
 	}
 

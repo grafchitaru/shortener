@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/grafchitaru/shortener/internal/storage"
+	"github.com/jackc/pgx/v5"
 	"github.com/mattn/go-sqlite3"
 )
 
@@ -23,6 +24,7 @@ func New(storagePath string) (*Storage, error) {
 	stmt, err := db.Prepare(`
     CREATE TABLE IF NOT EXISTS url(
         id INTEGER PRIMARY KEY,
+        user_id TEXT NOT NULL,
         alias TEXT NOT NULL UNIQUE,
         url TEXT NOT NULL);
     CREATE INDEX IF NOT EXISTS idx_alias ON url(alias);
@@ -39,10 +41,10 @@ func New(storagePath string) (*Storage, error) {
 	return &Storage{db: db}, nil
 }
 
-func (s *Storage) SaveURL(urlToSave string, alias string) (int64, error) {
+func (s *Storage) SaveURL(urlToSave string, alias string, userId string) (int64, error) {
 	const op = "storage.sqlite.SaveURL"
 
-	stmt, err := s.db.Prepare("INSERT INTO url(url,alias) values(?,?)")
+	stmt, err := s.db.Prepare("INSERT INTO url(url, alias, user_id) values(?, ?, ?)")
 	if err != nil {
 		return 0, fmt.Errorf("%s: prepare statement: %w", op, err)
 	}
@@ -83,6 +85,31 @@ func (s *Storage) GetURL(alias string) (string, error) {
 	}
 
 	return resURL, nil
+}
+
+func (s *Storage) GetUserURLs(UserId string, baseUrl string) ([]storage.ShortURL, error) {
+	const op = "storage.sqlite.GetURL"
+
+	rows, err := s.db.Query("SELECT url, alias FROM url WHERE user_id = $1", UserId)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, storage.ErrURLNotFound
+	}
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	urls := make([]storage.ShortURL, 0)
+	for rows.Next() {
+		var url storage.ShortURL
+		err := rows.Scan(&url.OriginalURL, &url.ShortURL)
+		if err != nil {
+			return nil, fmt.Errorf("%s: %w", op, err)
+		}
+		url.ShortURL = baseUrl + url.ShortURL
+		urls = append(urls, url)
+	}
+
+	return urls, nil
 }
 
 func (s *Storage) GetAlias(url string) (string, error) {

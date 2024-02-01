@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"github.com/go-chi/chi/v5"
+	"github.com/grafchitaru/shortener/internal/auth"
 	"github.com/grafchitaru/shortener/internal/compress"
 	"github.com/grafchitaru/shortener/internal/config"
 	"github.com/grafchitaru/shortener/internal/handlers"
@@ -16,6 +17,11 @@ func New(ctx config.HandlerContext) {
 
 	r.Use(logger.WithLogging)
 	r.Use(compress.WithCompressionResponse)
+	r.Use(auth.WithUserCookie(ctx))
+
+	r.Get("/api/user/urls", func(res http.ResponseWriter, req *http.Request) {
+		handlers.GetUserUrls(ctx, res, req)
+	})
 
 	r.Post("/api/shorten/batch", func(res http.ResponseWriter, req *http.Request) {
 		handlers.CreateLinkBatch(ctx, res, req)

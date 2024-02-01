@@ -24,6 +24,7 @@ func New(connString string) (*Storage, error) {
 	_, err = conn.Exec(context.Background(), `
 		CREATE TABLE IF NOT EXISTS url(
 			id SERIAL PRIMARY KEY,
+			user_id UUID NOT NULL,
 			alias TEXT NOT NULL UNIQUE,
 			url TEXT NOT NULL UNIQUE
 );
@@ -35,7 +36,7 @@ func New(connString string) (*Storage, error) {
 	return &Storage{conn: conn}, nil
 }
 
-func (s *Storage) SaveURL(urlToSave string, alias string) (int64, error) {
+func (s *Storage) SaveURL(urlToSave string, alias string, userId string) (int64, error) {
 	const op = "storage.postgresql.SaveURL"
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
@@ -49,10 +50,10 @@ func (s *Storage) SaveURL(urlToSave string, alias string) (int64, error) {
 
 	var id int64
 	err = tx.QueryRow(context.Background(), `
-		INSERT INTO url(url,alias) VALUES($1,$2)
+		INSERT INTO url(url, alias, user_id) VALUES($1, $2, $3)
 		ON CONFLICT (alias) DO NOTHING
 		RETURNING id;
-	`, urlToSave, alias).Scan(&id)
+	`, urlToSave, alias, userId).Scan(&id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			err := tx.QueryRow(context.Background(), "SELECT url FROM url WHERE alias=$1", alias).Scan(&urlToSave)
@@ -85,6 +86,31 @@ func (s *Storage) GetURL(alias string) (string, error) {
 	}
 
 	return resURL, nil
+}
+
+func (s *Storage) GetUserURLs(UserId string, BaseUrl string) ([]storage.ShortURL, error) {
+	const op = "storage.postgresql.GetURL"
+
+	rows, err := s.conn.Query(context.Background(), "SELECT url, alias FROM url WHERE user_id = $1", UserId)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, storage.ErrURLNotFound
+	}
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	urls := make([]storage.ShortURL, 0)
+	for rows.Next() {
+		var url storage.ShortURL
+		err := rows.Scan(&url.OriginalURL, &url.ShortURL)
+		if err != nil {
+			return nil, fmt.Errorf("%s: %w", op, err)
+		}
+		url.ShortURL = BaseUrl + url.ShortURL
+		urls = append(urls, url)
+	}
+
+	return urls, nil
 }
 
 func (s *Storage) GetAlias(url string) (string, error) {

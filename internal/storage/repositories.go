@@ -3,6 +3,7 @@ package storage
 type BatchURL struct {
 	CorrelationID string `json:"correlation_id"`
 	OriginalURL   string `json:"original_url"`
+	UserID        string `json:"user_id"`
 }
 
 type BatchResult struct {
@@ -10,9 +11,15 @@ type BatchResult struct {
 	ShortURL      string `json:"short_url"`
 }
 
+type ShortURL struct {
+	ShortURL    string `json:"short_url"`
+	OriginalURL string `json:"original_url"`
+}
+
 type Repositories interface {
-	SaveURL(urlToSave string, alias string) (int64, error)
+	SaveURL(urlToSave string, alias string, userId string) (int64, error)
 	GetURL(alias string) (string, error)
+	GetUserURLs(userId string, baseUrl string) ([]ShortURL, error)
 	GetAlias(url string) (string, error)
 	Ping() error
 }

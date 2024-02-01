@@ -10,6 +10,7 @@ type Config struct {
 	SqliteStoragePath   string `env:"SQLITE_STORAGE_PATH" envDefault:"././internal/storage/storage.db"`
 	FileDatabasePath    string `env:"FILE_STORAGE_PATH"`
 	PostgresDatabaseDsn string `env:"DATABASE_DSN"` // envDefault:"postgres://root:root@localhost:54321/app"
+	SecretKey           string `env:"SECRET_KEY" envDefault:"your_secret_key"`
 }
 
 type HandlerContext struct {
