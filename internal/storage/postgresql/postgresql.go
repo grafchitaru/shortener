@@ -91,7 +91,7 @@ func (s *Storage) GetURL(alias string) (string, error) {
 func (s *Storage) GetUserURLs(UserID string, BaseURL string) ([]storage.ShortURL, error) {
 	const op = "storage.postgresql.GetURL"
 
-	rows, err := s.conn.Query(context.Background(), "SELECT url, alias FROM url WHERE user_id = $1", UserID)
+	rows, err := s.conn.Query(context.Background(), "SELECT url, alias FROM url")
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, storage.ErrURLNotFound
 	}
