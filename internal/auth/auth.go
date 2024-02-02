@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"fmt"
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
 	"github.com/grafchitaru/shortener/internal/config"
@@ -25,12 +24,21 @@ func WithUserCookie(ctx config.HandlerContext) func(next http.Handler) http.Hand
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			cookie, err := r.Cookie("token")
-			if err != nil || cookie.Value == "" {
-				userID, err := uuid.Parse("00000000-0000-0000-0000-000000000000")
-				if err != nil {
-					fmt.Println("Error:", err)
+			if err != nil && err != http.ErrNoCookie {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+			isBatchByUserID := r.Method == http.MethodGet && r.RequestURI == "/api/user/urls"
+
+			if err == http.ErrNoCookie {
+				if isBatchByUserID {
+					http.Error(w, "Unauthorized", http.StatusUnauthorized)
 					return
 				}
+			}
+
+			if err != nil || cookie.Value == "" {
+				userID := uuid.New()
 				token, _ := GenerateToken(userID, ctx.Config.SecretKey)
 
 				http.SetCookie(w, &http.Cookie{
