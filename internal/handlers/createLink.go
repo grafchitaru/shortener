@@ -3,7 +3,6 @@ package handlers
 import (
 	"compress/gzip"
 	"errors"
-	"github.com/google/uuid"
 	"github.com/grafchitaru/shortener/internal/app"
 	"github.com/grafchitaru/shortener/internal/auth"
 	"github.com/grafchitaru/shortener/internal/config"
@@ -43,7 +42,7 @@ func CreateLink(ctx config.HandlerContext, res http.ResponseWriter, req *http.Re
 
 	userID, err := auth.GetUserID(req, ctx.Config.SecretKey)
 	if err != nil {
-		userID = uuid.New().String()
+		userID = req.Header.Get("Authorization")
 	}
 
 	if alias != "" {

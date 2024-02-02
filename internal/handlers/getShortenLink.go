@@ -77,12 +77,12 @@ func GetShorten(ctx config.HandlerContext, res http.ResponseWriter, req *http.Re
 	result := Result{
 		Result: ctx.Config.BaseShortURL + "/" + alias,
 	}
-	resp, err := json.Marshal(result)
+	data, err := json.Marshal(result)
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	res.WriteHeader(status)
-	res.Write([]byte(resp))
+	res.Write(data)
 }
