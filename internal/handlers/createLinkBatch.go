@@ -4,7 +4,9 @@ import (
 	"compress/gzip"
 	"encoding/json"
 	"errors"
+	"github.com/google/uuid"
 	"github.com/grafchitaru/shortener/internal/app"
+	"github.com/grafchitaru/shortener/internal/auth"
 	"github.com/grafchitaru/shortener/internal/config"
 	"github.com/grafchitaru/shortener/internal/storage"
 	"io"
@@ -44,13 +46,18 @@ func CreateLinkBatch(ctx config.HandlerContext, res http.ResponseWriter, req *ht
 			return
 		}
 
+		userID, err := auth.GetUserID(req, ctx.Config.SecretKey)
+		if err != nil {
+			userID = uuid.New().String()
+		}
+
 		if alias != "" {
 			res.WriteHeader(http.StatusConflict)
 		}
 
 		if alias == "" {
 			alias = app.NewRandomString(6)
-			_, err = ctx.Repos.SaveURL(b.OriginalURL, alias)
+			_, err = ctx.Repos.SaveURL(b.OriginalURL, alias, userID)
 			if err != nil {
 				http.Error(res, err.Error(), http.StatusInternalServerError)
 				return

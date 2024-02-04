@@ -4,7 +4,9 @@ import (
 	"compress/gzip"
 	"encoding/json"
 	"errors"
+	"github.com/google/uuid"
 	"github.com/grafchitaru/shortener/internal/app"
+	"github.com/grafchitaru/shortener/internal/auth"
 	"github.com/grafchitaru/shortener/internal/config"
 	"github.com/grafchitaru/shortener/internal/storage"
 	"io"
@@ -61,21 +63,26 @@ func GetShorten(ctx config.HandlerContext, res http.ResponseWriter, req *http.Re
 		res.WriteHeader(http.StatusConflict)
 	}
 
+	userID, err := auth.GetUserID(req, ctx.Config.SecretKey)
+	if err != nil {
+		userID = uuid.New().String()
+	}
+
 	if alias == "" {
 		alias = app.NewRandomString(6)
-		ctx.Repos.SaveURL(url, alias)
+		ctx.Repos.SaveURL(url, alias, userID)
 		status = http.StatusCreated
 	}
 
 	result := Result{
 		Result: ctx.Config.BaseShortURL + "/" + alias,
 	}
-	resp, err := json.Marshal(result)
+	data, err := json.Marshal(result)
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	res.WriteHeader(status)
-	res.Write([]byte(resp))
+	res.Write(data)
 }

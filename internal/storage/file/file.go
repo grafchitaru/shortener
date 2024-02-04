@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/grafchitaru/shortener/internal/storage"
 	"os"
 	"path/filepath"
@@ -30,17 +31,20 @@ func New(filePath string) (*Storage, error) {
 	return &Storage{filePath: filePath}, nil
 }
 
-func (s *Storage) SaveURL(urlToSave string, alias string) (int64, error) {
+func (s *Storage) SaveURL(urlToSave string, alias string, userID string) (int64, error) {
 	type URLData struct {
 		UUID        string `json:"uuid"`
 		ShortURL    string `json:"short_url"`
 		OriginalURL string `json:"original_url"`
+		UserID      string `json:"user_id"`
 	}
 
+	uuid := uuid.New()
 	data := URLData{
 		UUID:        alias,
 		ShortURL:    alias,
 		OriginalURL: urlToSave,
+		UserID:      uuid.String(),
 	}
 
 	jsonData, err := json.Marshal(data)
@@ -129,6 +133,37 @@ func (s *Storage) GetAlias(url string) (string, error) {
 	}
 
 	return "", storage.ErrAliasNotFound
+}
+
+func (s *Storage) GetUserURLs(UserID string, baseURL string) ([]storage.ShortURL, error) {
+	f, err := os.Open(s.filePath)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	scanner := bufio.NewScanner(f)
+	var urls []storage.ShortURL
+	for scanner.Scan() {
+		var url storage.BatchURL
+		err := json.Unmarshal(scanner.Bytes(), &url)
+		if err != nil {
+			continue
+		}
+
+		if url.UserID == UserID {
+			urls = append(urls, storage.ShortURL{
+				ShortURL:    baseURL + url.CorrelationID,
+				OriginalURL: url.OriginalURL,
+			})
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+
+	return urls, nil
 }
 
 func (s *Storage) Ping() error {
