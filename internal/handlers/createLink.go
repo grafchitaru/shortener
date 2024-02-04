@@ -42,6 +42,7 @@ func CreateLink(ctx config.HandlerContext, res http.ResponseWriter, req *http.Re
 	}
 
 	userID, err := auth.GetUserID(req, ctx.Config.SecretKey)
+
 	if err != nil {
 		userID = req.Header.Get("Authorization")
 		if userID == "" {
