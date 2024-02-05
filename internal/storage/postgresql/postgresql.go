@@ -151,8 +151,6 @@ func (s *Storage) DeleteUserURLs(userID string, deleteIDs []string) (string, err
 	for i := 0; i < len(deleteIDs); i++ {
 		select {
 		case <-done:
-			// Do nothing, just break the select.
-			break
 		case <-resultChannel:
 			totalDeleted++
 		}
