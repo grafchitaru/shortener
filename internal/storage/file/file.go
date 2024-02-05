@@ -272,3 +272,7 @@ func (s *Storage) Ping() error {
 	}
 	return nil
 }
+
+func (s *Storage) Close() {
+
+}

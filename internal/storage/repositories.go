@@ -23,4 +23,5 @@ type Repositories interface {
 	DeleteUserURLs(userID string, DeleteID []string) (string, error)
 	GetAlias(url string) (string, error)
 	Ping() error
+	Close()
 }

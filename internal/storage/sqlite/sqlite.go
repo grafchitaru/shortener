@@ -203,3 +203,7 @@ func (s *Storage) GetAlias(url string) (string, error) {
 func (s *Storage) Ping() error {
 	return s.db.Ping()
 }
+
+func (s *Storage) Close() {
+
+}

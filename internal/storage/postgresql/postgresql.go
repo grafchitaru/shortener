@@ -191,3 +191,7 @@ func (s *Storage) Ping() error {
 	defer cancel()
 	return s.pool.Ping(ctx)
 }
+
+func (s *Storage) Close() {
+	s.pool.Close()
+}

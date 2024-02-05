@@ -37,3 +37,7 @@ func (ms *MockStorage) GetAlias(url string) (string, error) {
 func (ms *MockStorage) Ping() error {
 	return ms.PingError
 }
+
+func (ms *MockStorage) Close() {
+
+}

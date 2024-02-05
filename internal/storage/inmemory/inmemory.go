@@ -59,3 +59,7 @@ func (r *Repositories) GetAlias(url string) (string, error) {
 func (r *Repositories) Ping() error {
 	return nil
 }
+
+func (r *Repositories) Close() {
+
+}
