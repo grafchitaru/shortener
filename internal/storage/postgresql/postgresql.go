@@ -87,7 +87,7 @@ func (s *Storage) GetURL(alias string) (string, error) {
 		return "", fmt.Errorf("%s: %w", op, err)
 	}
 	if isDeleted == true {
-		return "", fmt.Errorf("%w", "Url Is Deleted")
+		return "", fmt.Errorf("%w", "isDeleted")
 	}
 
 	return resURL, nil

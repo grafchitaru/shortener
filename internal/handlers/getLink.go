@@ -11,7 +11,7 @@ func GetLink(ctx config.HandlerContext, res http.ResponseWriter, req *http.Reque
 	path := chi.URLParam(req, "id")
 	alias, err := ctx.Repos.GetURL(path)
 	if err != nil {
-		if strings.Contains(err.Error(), "Url Is Deleted") {
+		if strings.Contains(err.Error(), "isDeleted") {
 			http.Error(res, "The requested resource has been deleted.", http.StatusGone)
 		} else {
 			http.Error(res, err.Error(), http.StatusNotFound)
