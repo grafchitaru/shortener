@@ -6,35 +6,43 @@ import (
 	"fmt"
 	"github.com/grafchitaru/shortener/internal/storage"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"time"
 )
 
 type Storage struct {
-	conn *pgx.Conn
+	pool *pgxpool.Pool
 }
 
 func New(connString string) (*Storage, error) {
 	const op = "storage.postgresql.NewStorage"
 
-	conn, err := pgx.Connect(context.Background(), connString)
+	config, err := pgxpool.ParseConfig(connString)
+
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", op, err)
+		return nil, fmt.Errorf("%s: unable to parse config: %w", op, err)
 	}
 
-	_, err = conn.Exec(context.Background(), `
+	pool, err := pgxpool.NewWithConfig(context.Background(), config)
+	if err != nil {
+		return nil, fmt.Errorf("%s: unable to connect: %w", op, err)
+	}
+
+	_, err = pool.Exec(context.Background(), `
 		CREATE TABLE IF NOT EXISTS url(
 			id SERIAL PRIMARY KEY,
 			user_id UUID NOT NULL,
 			alias TEXT NOT NULL UNIQUE,
 			url TEXT NOT NULL UNIQUE,
 			is_deleted BOOLEAN DEFAULT FALSE
-);
-		`)
+		);
+	`)
 	if err != nil {
+		pool.Close()
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
-	return &Storage{conn: conn}, nil
+	return &Storage{pool: pool}, nil
 }
 
 func (s *Storage) SaveURL(urlToSave string, alias string, userID string) (int64, error) {
@@ -42,7 +50,7 @@ func (s *Storage) SaveURL(urlToSave string, alias string, userID string) (int64,
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
-	tx, err := s.conn.Begin(ctx)
+	tx, err := s.pool.Begin(ctx)
 
 	if err != nil {
 		return 0, fmt.Errorf("%s: %w", op, err)
@@ -79,7 +87,7 @@ func (s *Storage) GetURL(alias string) (string, error) {
 
 	var resURL string
 	var isDeleted bool
-	err := s.conn.QueryRow(context.Background(), "SELECT url, is_deleted FROM url WHERE alias = $1", alias).Scan(&resURL, &isDeleted)
+	err := s.pool.QueryRow(context.Background(), "SELECT url, is_deleted FROM url WHERE alias = $1", alias).Scan(&resURL, &isDeleted)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return "", storage.ErrURLNotFound
 	}
@@ -96,7 +104,7 @@ func (s *Storage) GetURL(alias string) (string, error) {
 func (s *Storage) GetUserURLs(UserID string, BaseURL string) ([]storage.ShortURL, error) {
 	const op = "storage.postgresql.GetUserURLs"
 
-	rows, err := s.conn.Query(context.Background(), "SELECT url, alias FROM url WHERE user_id = $1", UserID)
+	rows, err := s.pool.Query(context.Background(), "SELECT url, alias FROM url WHERE user_id = $1", UserID)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, storage.ErrURLNotFound
 	}
@@ -134,7 +142,7 @@ func (s *Storage) DeleteUserURLs(userID string, deleteIDs []string) (string, err
 
 	go func() {
 		for id := range idChannel {
-			_, err := s.conn.Exec(context.Background(), `
+			_, err := s.pool.Exec(context.Background(), `
                 UPDATE url SET is_deleted = TRUE
                 WHERE alias = $1 AND user_id = $2;
             `, id, userID)
@@ -167,7 +175,7 @@ func (s *Storage) GetAlias(url string) (string, error) {
 	const op = "storage.postgresql.GetAlias"
 
 	var resAlias string
-	err := s.conn.QueryRow(context.Background(), "SELECT alias FROM url WHERE url = $1", url).Scan(&resAlias)
+	err := s.pool.QueryRow(context.Background(), "SELECT alias FROM url WHERE url = $1", url).Scan(&resAlias)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return "", storage.ErrAliasNotFound
 	}
@@ -181,5 +189,5 @@ func (s *Storage) GetAlias(url string) (string, error) {
 func (s *Storage) Ping() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	return s.conn.Ping(ctx)
+	return s.pool.Ping(ctx)
 }
