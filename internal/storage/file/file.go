@@ -206,7 +206,7 @@ func (s *Storage) DeleteUserURLs(userID string, deleteIDs []string) (string, err
 	}()
 
 	totalDeleted := 0
-	for _ = range resultChannel {
+	for range resultChannel {
 		totalDeleted++
 	}
 

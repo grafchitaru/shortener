@@ -86,7 +86,7 @@ func (s *Storage) GetURL(alias string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("%s: %w", op, err)
 	}
-	if isDeleted == true {
+	if isDeleted {
 		return "", fmt.Errorf("isDeleted")
 	}
 
@@ -151,6 +151,7 @@ func (s *Storage) DeleteUserURLs(userID string, deleteIDs []string) (string, err
 	for i := 0; i < len(deleteIDs); i++ {
 		select {
 		case <-done:
+			// Do nothing, just break the select.
 			break
 		case <-resultChannel:
 			totalDeleted++
