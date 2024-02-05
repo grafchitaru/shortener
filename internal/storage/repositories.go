@@ -20,6 +20,7 @@ type Repositories interface {
 	SaveURL(urlToSave string, alias string, userID string) (int64, error)
 	GetURL(alias string) (string, error)
 	GetUserURLs(userID string, baseURL string) ([]ShortURL, error)
+	DeleteUserURLs(userID string, DeleteID []string) (string, error)
 	GetAlias(url string) (string, error)
 	Ping() error
 }

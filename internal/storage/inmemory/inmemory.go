@@ -39,6 +39,10 @@ func (r *Repositories) GetUserURLs(UserID string, baseURL string) ([]storage.Sho
 	return nil, nil
 }
 
+func (r *Repositories) DeleteUserURLs(UserID string, DeleteID []string) (string, error) {
+	return "", nil
+}
+
 func (r *Repositories) GetAlias(url string) (string, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()

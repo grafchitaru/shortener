@@ -1,12 +1,15 @@
 package sqlite
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
 	"github.com/grafchitaru/shortener/internal/storage"
 	"github.com/jackc/pgx/v5"
 	"github.com/mattn/go-sqlite3"
+	"runtime"
+	"sync"
 )
 
 type Storage struct {
@@ -26,7 +29,8 @@ func New(storagePath string) (*Storage, error) {
         id INTEGER PRIMARY KEY,
         user_id TEXT NOT NULL,
         alias TEXT NOT NULL UNIQUE,
-        url TEXT NOT NULL);
+        url TEXT NOT NULL,
+        is_deleted BOOLEAN DEFAULT FALSE);
     CREATE INDEX IF NOT EXISTS idx_alias ON url(alias);
     `)
 	if err != nil {
@@ -123,6 +127,56 @@ func (s *Storage) GetUserURLs(UserID string, baseURL string) ([]storage.ShortURL
 	}
 
 	return urls, nil
+}
+
+func (s *Storage) DeleteUserURLs(userID string, deleteIDs []string) (string, error) {
+	const op = "storage.postgresql.DeleteUserURLs"
+
+	idChannel := make(chan string, len(deleteIDs))
+	resultChannel := make(chan bool, len(deleteIDs))
+
+	go func() {
+		for _, id := range deleteIDs {
+			idChannel <- id
+		}
+		close(idChannel)
+	}()
+
+	numWorkers := runtime.NumCPU()
+	var wg sync.WaitGroup
+	wg.Add(numWorkers)
+	for i := 0; i < numWorkers; i++ {
+		go func() {
+			defer wg.Done()
+			for id := range idChannel {
+				_, err := s.db.ExecContext(context.Background(), `
+                    UPDATE url SET is_deleted = TRUE
+                    WHERE alias = $1 AND user_id = $2;
+                `, id, userID)
+				if err != nil {
+					//TODO logging
+					continue
+				}
+				resultChannel <- true
+			}
+		}()
+	}
+
+	go func() {
+		wg.Wait()
+		close(resultChannel)
+	}()
+
+	totalDeleted := 0
+	for _ = range resultChannel {
+		totalDeleted++
+	}
+
+	if totalDeleted == 0 {
+		return "", fmt.Errorf("%s: no URLs were deleted", op)
+	}
+
+	return fmt.Sprintf("Deleted %d URLs", totalDeleted), nil
 }
 
 func (s *Storage) GetAlias(url string) (string, error) {

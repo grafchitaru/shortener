@@ -19,6 +19,10 @@ func New(ctx config.HandlerContext) {
 	r.Use(compress.WithCompressionResponse)
 	r.Use(auth.WithUserCookie(ctx))
 
+	r.Delete("/api/user/urls", func(res http.ResponseWriter, req *http.Request) {
+		handlers.DeleteUserUrls(ctx, res, req)
+	})
+
 	r.Get("/api/user/urls", func(res http.ResponseWriter, req *http.Request) {
 		handlers.GetUserUrls(ctx, res, req)
 	})
