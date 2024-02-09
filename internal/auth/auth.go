@@ -90,5 +90,6 @@ func GetUserID(req *http.Request, secretKey string) (string, error) {
 		return "", err
 	}
 
-	return claims["user_id"].(string), nil
+	userID, _ := claims["user_id"].(string)
+	return userID, nil
 }
