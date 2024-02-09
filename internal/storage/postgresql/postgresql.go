@@ -7,7 +7,6 @@ import (
 	"github.com/grafchitaru/shortener/internal/storage"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"strings"
 	"time"
 )
 
@@ -129,64 +128,41 @@ func (s *Storage) GetUserURLs(UserID string, BaseURL string) ([]storage.ShortURL
 
 func (s *Storage) DeleteUserURLs(userID string, deleteIDs []string) (string, error) {
 	const op = "storage.postgresql.DeleteUserURLs"
-	const batchSize = 100
 
 	idChannel := make(chan string, len(deleteIDs))
-	batchChannel := make(chan []string, batchSize)
-	done := make(chan struct{})
+	resultChannel := make(chan int, len(deleteIDs))
 
 	go func() {
+		defer close(idChannel)
 		for _, id := range deleteIDs {
 			idChannel <- id
 		}
-		close(idChannel)
 	}()
 
 	go func() {
-		var batch []string
 		for id := range idChannel {
-			batch = append(batch, id)
-			if len(batch) >= batchSize {
-				batchChannel <- batch
-				batch = nil
-			}
-		}
-		if len(batch) > 0 {
-			batchChannel <- batch
-		}
-		close(batchChannel)
-	}()
-
-	go func() {
-		for batch := range batchChannel {
-			ids := strings.Join(batch, ", ")
 			_, err := s.pool.Exec(context.Background(), `
-				UPDATE url SET is_deleted = TRUE
-				WHERE alias IN ($1) AND user_id = $2;
-			`, ids, userID)
+                UPDATE url SET is_deleted = TRUE
+                WHERE alias = $1 AND user_id = $2;
+            `, id, userID)
 			if err != nil {
 				// TODO: logging
 				continue
 			}
-			done <- struct{}{}
+			resultChannel <- 1
 		}
 	}()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute) // Adjust timeout as needed
-	defer cancel()
-
 	var totalDeleted int
-	for {
-		select {
-		case <-done:
-			totalDeleted++
-		case <-ctx.Done():
-			if totalDeleted == 0 {
-				return "", fmt.Errorf("%s: no URLs were deleted", op)
-			}
-			return fmt.Sprintf("Deleted %d URLs", totalDeleted), nil
-		}
+	for range deleteIDs {
+		totalDeleted += <-resultChannel
 	}
+
+	if totalDeleted == 0 {
+		return "", fmt.Errorf("%s: no URLs were deleted", op)
+	}
+
+	return fmt.Sprintf("Deleted %d URLs", totalDeleted), nil
 }
 
 func (s *Storage) GetAlias(url string) (string, error) {
