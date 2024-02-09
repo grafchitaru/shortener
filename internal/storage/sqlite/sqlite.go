@@ -103,10 +103,6 @@ func (s *Storage) GetUserURLs(UserID string, baseURL string) ([]storage.ShortURL
 	}
 	defer rows.Close()
 
-	for rows.Next() {
-		// process rows here
-	}
-
 	if err := rows.Err(); err != nil {
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
