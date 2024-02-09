@@ -130,7 +130,7 @@ func (s *Storage) DeleteUserURLs(userID string, deleteIDs []string) (string, err
 	const op = "storage.postgresql.DeleteUserURLs"
 
 	idChannel := make(chan string, len(deleteIDs))
-	resultChannel := make(chan bool, len(deleteIDs))
+	resultChannel := make(chan struct{}, len(deleteIDs))
 	done := make(chan bool)
 
 	go func() {
@@ -150,7 +150,7 @@ func (s *Storage) DeleteUserURLs(userID string, deleteIDs []string) (string, err
 				// TODO: logging
 				continue
 			}
-			resultChannel <- true
+			resultChannel <- struct{}{}
 		}
 		done <- true
 	}()
