@@ -20,13 +20,14 @@ func DeleteUserUrls(ctx config.HandlerContext, res http.ResponseWriter, req *htt
 		return
 	}
 
-	message, err := ctx.Repos.DeleteUserURLs(userID, deleteIDs)
-	if err != nil {
-		http.Error(res, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	go func() {
+		_, err := ctx.Repos.DeleteUserURLs(userID, deleteIDs)
+		if err != nil {
+			http.Error(res, err.Error(), http.StatusBadRequest)
+		}
+	}()
 
 	res.Header().Set("Content-Type", "application/json")
 	res.WriteHeader(http.StatusAccepted)
-	json.NewEncoder(res).Encode(map[string]string{"message": message})
+	json.NewEncoder(res).Encode(map[string]string{"message": "Deletion process started."})
 }
