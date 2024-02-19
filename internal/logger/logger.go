@@ -53,12 +53,16 @@ func WithLogging(next http.Handler) http.Handler {
 
 		duration := time.Since(start)
 
+		defer r.Body.Close()
+
 		sugar.Infoln(
 			"uri", r.RequestURI,
 			"method", r.Method,
 			"status", responseData.status,
 			"duration", duration,
 			"size", responseData.size,
+			"cookie", r.Cookies(),
+			"bearer", r.Header.Get("Authorization"),
 		)
 	})
 }

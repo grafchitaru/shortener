@@ -16,7 +16,7 @@ func New() *Repositories {
 	}
 }
 
-func (r *Repositories) SaveURL(urlToSave string, alias string) (int64, error) {
+func (r *Repositories) SaveURL(urlToSave string, alias string, userID string) (int64, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -35,6 +35,14 @@ func (r *Repositories) GetURL(alias string) (string, error) {
 	return url, nil
 }
 
+func (r *Repositories) GetUserURLs(UserID string, baseURL string) ([]storage.ShortURL, error) {
+	return nil, nil
+}
+
+func (r *Repositories) DeleteUserURLs(UserID string, DeleteID []string) (string, error) {
+	return "", nil
+}
+
 func (r *Repositories) GetAlias(url string) (string, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
@@ -50,4 +58,8 @@ func (r *Repositories) GetAlias(url string) (string, error) {
 
 func (r *Repositories) Ping() error {
 	return nil
+}
+
+func (r *Repositories) Close() {
+
 }

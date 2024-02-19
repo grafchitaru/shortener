@@ -30,5 +30,7 @@ func main() {
 		fmt.Println("Error initialize storage: %w", err)
 	}
 
+	defer storage.Close()
+
 	server.New(config.HandlerContext{Config: cfg, Repos: storage})
 }
